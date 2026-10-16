@@ -1,0 +1,87 @@
+# Aggiorna la mappa ogni settimana (e quando lo chiedi a mano da GitHub > Actions > "Aggiorna la mappa").
+# Scarica OpenStreetMap e i dati del Comune, ricostruisce data/strade.json, fa il collaudo e pubblica
+# SOLO se tutte le prove passano. Se qualcosa fallisce, GitHub manda una mail e l'app resta com'e'.
+name: Aggiorna la mappa
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'   # ogni lunedi' alle 3:17 UTC (5:17 ora di Milano d'estate)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aggiorna-mappa
+  cancel-in-progress: false
+
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installa gli strumenti
+        run: pip install osmium shapely
+
+      - name: Scarica le fonti (OpenStreetMap e Comune di Milano)
+        run: bash tools/scarica_fonti.sh fonti
+
+      - name: Costruisci la mappa
+        run: |
+          cp data/strade.json fonti/precedente.json
+          # --rigoroso: si ferma se una regola del Comune non trova piu' la sua via
+          python3 tools/build_data.py --osm fonti/lombardia.osm.pbf --osm-state fonti/lombardia.state.txt \
+            --civici fonti/civici.csv --out fonti/strade.json --sfondo fonti/sfondo.json --rigoroso
+
+      - name: Rapporto e confronto con la versione precedente
+        run: |
+          # --blocca-nuovi: si ferma se compare un disaccordo nuovo con il Comune (non in eccezioni_comune.json)
+          python3 tools/check_data.py --data fonti/strade.json --aree fonti/aree.geojson \
+            --old fonti/precedente.json --out fonti/rapporto.md \
+            --eccezioni tools/eccezioni_comune.json --blocca-nuovi
+          node tools/compare_routes.js fonti/precedente.json fonti/strade.json | tee fonti/confronto.txt
+          {
+            echo '## Mappa aggiornata'
+            echo
+            echo '```'
+            tail -n 1 fonti/confronto.txt
+            echo '```'
+            sed -n '1,8p' fonti/rapporto.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Collaudo (se fallisce, non si pubblica nulla)
+        env:
+          SCOOTLY_TRAGITTI: ${{ secrets.SCOOTLY_TRAGITTI }}   # tragitti personali (facoltativo, privato)
+        run: node tools/collaudo.js fonti/strade.json --precedente fonti/precedente.json
+
+      - name: Conserva il rapporto (anche se qualcosa e' andato storto)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapporto-mappa
+          path: |
+            fonti/rapporto.md
+            fonti/confronto.txt
+          if-no-files-found: ignore
+
+      - name: Pubblica
+        run: |
+          cp fonti/strade.json data/strade.json
+          cp fonti/sfondo.json data/sfondo.json
+          cp fonti/rapporto.md data/rapporto.md
+          if git diff --quiet -- data; then echo 'Nessuna novita'; exit 0; fi
+          git config user.name 'Aggiornamento mappa'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data
+          git commit -m "Mappa aggiornata: OpenStreetMap del $(python3 -c "import json;print(json.load(open('data/strade.json'))['meta']['osm'][:10])")"
+          git push
