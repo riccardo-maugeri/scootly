@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scootly">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#e9ece6">
+<meta name="theme-color" content="#0e0b14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,6 +69,7 @@
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
+html { background: #0e0b14; } /* scuro come l'apertura: niente lampo chiaro mentre la pagina si carica */
 body {
   background: var(--ground); color: var(--ink); font-family: var(--font-body); font-size: 15px;
   overflow: hidden; -webkit-tap-highlight-color: transparent;
@@ -298,6 +299,15 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 </style>
 </head>
 <body>
+<!-- Apertura: e' la prima cosa nella pagina, cosi' compare subito, prima di tutto il resto -->
+<div class="splash" id="splash" aria-label="Scootly">
+  <div class="aurora"></div><div class="in-glass"></div>
+  <div class="sp-logo"><span class="sp-ring"></span><span class="sp-ring"></span><div class="sp-icon"><svg viewBox="0 0 64 64"><g fill="currentColor"><circle cx="16" cy="46" r="8"/><circle cx="49" cy="46" r="8"/><path d="M7 44c0-10 7-16 17-16h5l4 11h10l3-5h4l-3 11H9z"/><rect x="13" y="21" width="17" height="6" rx="3"/><path d="M42 12h10a2 2 0 0 1 0 4h-3l4.5 25h-4.5l-4.5-25h-2.5a2 2 0 0 1 0-4z"/></g></svg></div></div>
+  <div class="sp-word"><span>S</span><span>c</span><span>o</span><span>o</span><span>t</span><span>l</span><span>y</span></div>
+  <p class="sp-tag">Milano in scooter</p>
+  <div class="sp-bar"><i></i></div>
+  <div class="sp-foot">Dentro la cerchia della 90/91</div>
+</div>
 <div id="app">
   <canvas id="map" aria-label="Mappa di Milano"></canvas>
 
@@ -901,14 +911,6 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 })(this);
 
 </script>
-<div class="splash" id="splash" aria-label="Scootly">
-  <div class="aurora"></div><div class="in-glass"></div>
-  <div class="sp-logo"><span class="sp-ring"></span><span class="sp-ring"></span><div class="sp-icon"><svg viewBox="0 0 64 64"><g fill="currentColor"><circle cx="16" cy="46" r="8"/><circle cx="49" cy="46" r="8"/><path d="M7 44c0-10 7-16 17-16h5l4 11h10l3-5h4l-3 11H9z"/><rect x="13" y="21" width="17" height="6" rx="3"/><path d="M42 12h10a2 2 0 0 1 0 4h-3l4.5 25h-4.5l-4.5-25h-2.5a2 2 0 0 1 0-4z"/></g></svg></div></div>
-  <div class="sp-word"><span>S</span><span>c</span><span>o</span><span>o</span><span>t</span><span>l</span><span>y</span></div>
-  <p class="sp-tag">Milano in scooter</p>
-  <div class="sp-bar"><i></i></div>
-  <div class="sp-foot">Dentro la cerchia della 90/91</div>
-</div>
 <script>
 // Apertura: logo animato a ogni avvio. Resta finche' la mappa e' pronta (evento 'scootly-ready'), almeno
 // 2,6 s alla prima apertura (poi parte l'introduzione) e 0,9 s le volte dopo; al massimo 8 s.
