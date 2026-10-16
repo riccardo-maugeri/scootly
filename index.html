@@ -131,9 +131,6 @@ body {
 .mode .sub { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .mode.moto .big { color: var(--accent); }
 .mode.car .big { color: var(--car); }
-.gain { padding: 8px 14px; border-top: 1px solid var(--panel-line); font-size: 14px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; }
-.gain b { color: var(--good); font-weight: 600; }
-.gain .more { margin-left: auto; font-family: var(--font-cond); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12px; color: var(--ink-faint); }
 .steps { max-height: 34vh; overflow-y: auto; border-top: 1px solid var(--panel-line); }
 .step { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--panel-line); }
 .step:last-child { border-bottom: 0; }
@@ -166,7 +163,7 @@ body {
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-soft); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; }
-.go { display: grid; grid-template-columns: 2fr 1fr 48px; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--panel-line); }
+.go { display: grid; grid-template-columns: 1fr 52px; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--panel-line); }
 .go .btn.primary { font-size: 16px; padding: 12px 10px; }
 .btn.star { font-size: 20px; padding: 8px 0; line-height: 1; color: var(--ink-soft); }
 .btn.star.on { color: #e0a100; }
@@ -1468,8 +1465,8 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
     const topPad = document.querySelector('.top').getBoundingClientRect().bottom + 10;
-    const card = document.getElementById('card').getBoundingClientRect();
-    const botPad = Math.max(20, Hp - card.top + 10);
+    const cardEl = document.getElementById('card'), card = cardEl.getBoundingClientRect();
+    const botPad = cardEl.hidden ? 20 : Math.max(20, Hp - card.top + 10);
     const availH = Math.max(120, Hp - topPad - botPad), availW = Math.max(120, Wp - 90);
     view.s = Math.min(availW / Math.max(x1 - x0, 50), availH / Math.max(y1 - y0, 50), 2.5);
     view.cx = (x0 + x1) / 2 + 20 / view.s;
@@ -1529,9 +1526,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       if (!sn || sn.dist * view.s > 30) { state.selWay = null; render(); redraw(); return; }
       state.selWay = W[EDGES[sn.e][2]][0]; state.pick = null; render(); redraw(); return;
     }
-    state.pick = sn && sn.dist * view.s < 40 ? [sn.px, sn.py] : [x, y];
-    state.pickName = sn ? (NAMES[W[EDGES[sn.e][2]][1]] || 'Strada senza nome') : 'Punto sulla mappa';
-    render(); redraw();
   }
 
   // ---------- Scheda ----------
@@ -1559,6 +1553,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   function closeUntil(days) { const d = new Date(); d.setHours(23, 59, 0, 0); d.setDate(d.getDate() + days); return d.toISOString(); }
 
   function render() {
+    card.hidden = false;
     // correzione
     if (state.fix) {
       if (state.selWay == null) {
@@ -1613,29 +1608,10 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       card.querySelector('#closesel').onclick = () => { state.selWay = null; render(); redraw(); };
       return;
     }
-    // punto toccato
-    if (state.pick) {
-      card.innerHTML = `<div class="pane"><h3>${esc(state.pickName)}</h3><p>Punto toccato sulla mappa.</p>
-        <div class="row"><button class="btn" id="setfrom">Parti da qui</button><button class="btn primary" id="setto">Arriva qui</button></div>
-        <button class="btn" id="setcasa">Salva come Casa</button>
-        <button class="btn" id="cancelpick">Annulla</button></div>`;
-      card.querySelector('#setfrom').onclick = () => { state.from = { label: state.pickName, p: state.pick, manual: true }; state.pick = null; syncInputs(); compute(true); render(); };
-      card.querySelector('#setto').onclick = () => { state.to = { label: state.pickName, p: state.pick }; addRecent(state.to); state.pick = null; syncInputs(); compute(true); render(); };
-      card.querySelector('#setcasa').onclick = () => {
-        CASA = [Math.round(state.pick[0]), Math.round(state.pick[1])];
-        try { localStorage.setItem('scooter-casa', JSON.stringify(CASA)); } catch (e) {}
-        FAV = favList(); buildChips();
-        state.from = { label: 'Casa', p: CASA }; state.pick = null; syncInputs(); compute(true); render();
-        toast('Casa salvata su questo telefono');
-      };
-      card.querySelector('#cancelpick').onclick = () => { state.pick = null; render(); redraw(); };
-      return;
-    }
     const m = state.moto, c = state.car;
-    if (!state.to) {
-      card.innerHTML = `<div class="pane"><h3>Dove vai?</h3><p>${state.from ? 'Scrivi la destinazione nel campo "A", oppure tocca un punto sulla mappa.' : 'Cerco la tua posizione… Intanto puoi scrivere la destinazione nel campo "A".'}</p>${accText(state.from)}${MAP_DATE ? `<p class="sub2">Mappa aggiornata al ${MAP_DATE}</p>` : ''}</div>`;
-      return;
-    }
+    // senza destinazione la scheda non c'e': resta solo la mappa
+    card.hidden = !state.to;
+    if (!state.to) { card.innerHTML = ''; return; }
     if (!state.from) {
       card.innerHTML = `<div class="pane"><h3>Cerco la tua posizione…</h3><p>Se non arriva, controlla che Safari possa usare la posizione, oppure scrivi la partenza nel campo "Da".</p></div>`;
       return;
@@ -1645,12 +1621,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       return;
     }
     const MF = timeFactor(), mt = m.time * MF.f;
-    const gain = c ? Math.round((c.time - mt) / 60) : 0;
-    const motoOnlyM = m.steps.filter(s => s.motoOnly).reduce((a, s) => a + s.len, 0);
-    let gainTxt;
-    if (!c) gainTxt = 'In auto non si arriva: solo lo scooter può.';
-    else if (gain >= 1) gainTxt = `In scooter risparmi <b>${gain} min</b>` + (motoOnlyM > 30 ? `, anche grazie a ${fmtKm(motoOnlyM)} su strade vietate alle auto` : '');
-    else gainTxt = 'Qui scooter e auto fanno praticamente la stessa strada.';
     let steps = '';
     if (state.expanded) {
       steps = '<div class="steps">' + m.steps.map((s, i) => `<div class="step"><span class="ic">${ic(i === 0 ? 'start' : s.turn)}</span>
@@ -1661,15 +1631,12 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
         <span class="mode moto"><span class="lab"><i style="background:var(--accent)"></i>In scooter</span><span class="big">${fmtMin(mt)}</span><span class="sub">${fmtKm(m.length)}${MF.n ? ` · <span class="sub2">sui tuoi ${MF.n} viaggi</span>` : ''}</span></span>
         <span class="mode car"><span class="lab"><i style="background:var(--car)"></i>In auto</span><span class="big">${c ? fmtMin(c.time) : 'no'}</span><span class="sub">${c ? fmtKm(c.length) : 'nessun percorso'}</span></span>
       </button>
-      <div class="gain"><span>${gainTxt}</span><span class="more">${state.expanded ? 'Chiudi' : 'Strade'}</span></div>
       ${state.from.gps && (state.from.coarse || state.from.acc > 40) ? `<div class="accbar">${accText(state.from)}</div>` : ''}
 ${steps}
-      <div class="go"><button class="btn primary" id="go">Vai</button><button class="btn" id="simgo">Prova simulata</button>${favBtn()}</div>`;
+      <div class="go"><button class="btn primary" id="go">Vai</button>${favBtn()}</div>`;
     card.querySelector('#go').onclick = () => startNav(false);
     card.querySelector('#favbtn').onclick = toggleFav;
-    card.querySelector('#simgo').onclick = () => startNav(true);
     card.querySelector('#toggle').onclick = () => { state.expanded = !state.expanded; render(); fitRoute(); };
-    card.querySelector('.gain').onclick = () => { state.expanded = !state.expanded; render(); fitRoute(); };
   }
 
   // ---------- Stella: salva l'arrivo con un nome (es. "Lavoro") ----------
