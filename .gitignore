@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 tools/tragitti_privati.json
 fonti/
+node_modules/

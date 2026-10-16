@@ -29,12 +29,14 @@ Nessun framework, nessuna compilazione, nessuna dipendenza: GitHub Pages serve i
 | `data/rapporto.md` | Rapporto in italiano sull'ultima mappa generata (`tools/check_data.py`). |
 | `sw.js` | Service worker: copia app e mappa sul telefono per usarle anche senza rete. Pagine: prima la rete; mappa: subito la copia salvata, la nuova si scarica in sottofondo. |
 | `tools/` | Strumenti per costruire, controllare e collaudare i dati (vedi `tools/README.md`). |
+| `.github/workflows/prove.yml` | A ogni richiesta di pubblicazione (e su `main`): `collaudo.js` e `tools/prove_app.js`, l'app vera in Chromium come un iPhone (avvio, dati vecchi, ricerca, preferiti, guida con voce e tempi, tema scuro, iPhone SE). |
 | `.github/workflows/aggiorna-mappa.yml` | Ogni lunedì ricostruisce la mappa e la pubblica solo se passano i controlli (regole del Comune tutte applicate, nessun disaccordo nuovo con il Comune, nessun cambiamento anomalo, collaudo). Dettagli in `tools/README.md`. |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon.png` | Installazione come app sulla Home. |
 
 Dentro `index.html`, in ordine:
 
-1. **CSS** (righe ~16–178) con tema chiaro/scuro.
+1. **CSS** con tema chiaro/scuro: scuro se lo è l'iPhone, e comunque da 20 min dopo il tramonto a 10 min
+   prima dell'alba (`nightTheme()`, alba e tramonto calcolati per Milano).
 2. **Motore percorsi** (`ScooterRouter`, il blocco che inizia con `// Motore di calcolo percorsi`, riga ~233):
    funziona sia nel browser sia in Node (`module.exports`); gli strumenti in `tools/` lo leggono da qui.
 3. **Interfaccia** (`(async function () {`, riga ~675–1556): carica `data/strade.json`, ricerca indirizzi,
@@ -113,6 +115,10 @@ In guida ~16 ms per immagine nel browser di prova.
   direzione; fuori percorso se oltre max(30, precisione+15) m per 2 letture e 3 s (o verso opposto per
   3 letture); `animFrame()` fa scorrere l'icona lungo la strada a ~30 fps stimando con la velocità.
   Prova di guida simulata nel browser: rumore ±10 m e una lettura sbagliata di 70 m → 0 ricalcoli.
+- Schermata di guida come Google Maps (`renderNav()`): riquadro verde in alto con freccia, distanza e via
+  (e "Poi" con la manovra dopo, se entro 250 m), barra in basso con minuti, km e ora di arrivo, X per uscire,
+  limite di velocità della via (campo `limite`), "Ricentra" se sposti la mappa. Zoom automatico (`navZoom()`):
+  più vicino da fermo e prima delle svolte, più lontano quando vai veloce.
 - Voce (come Google Maps, `voiceTick()`): per ogni manovra al massimo tre frasi, con tempi che dipendono
   dalla velocità media `nav.vs` (almeno 25 km/h): appena fatta la manovra precedente "Continua su Via X per
   800 metri" (se la prossima è lontana), preavviso ~22 s prima (≥ 160 m) "Tra 200 metri, svolta a destra in
@@ -127,7 +133,10 @@ In guida ~16 ms per immagine nel browser di prova.
 `[{nome, via, p: [x, y]}]`, salvati con la stella ☆ accanto a "Vai"; chiamarne uno "Casa" aggiorna `scooter-casa`), `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
-che pesano di più), `scooter-voce`.
+che pesano di più), `scooter-voce`, `scooter-tragitti` (tempi veri porta a porta: `[{a, b, s, d, h}]`, partenza
+e arrivo in metri, secondi; per lo stesso tragitto, partenza e arrivo entro 300 m, la scheda mostra la media, o la
+mediana da 3 viaggi, e l'ora di arrivo in guida segue quei tempi), `scooter-in-corso` (viaggio in guida, salvato ogni
+8 s: se l'app viene chiusa entro 400 m dall'arrivo, alla riapertura il viaggio conta con l'ora dell'ultima posizione).
 
 Tempi imparati: in navigazione vera `recPoint()` registra (ora, metri fatti) quando sei sul percorso con
 precisione ≤ 30 m; `recFlush()` (a fine viaggio e prima di ogni ricalcolo) calcola il tempo di ogni tratto,
@@ -161,6 +170,7 @@ il sito è pubblico.
 
 ```bash
 node tools/collaudo.js                      # prove automatiche sui dati in data/strade.json (devono passare tutte)
+node tools/prove_app.js                     # prove dell'app nel browser (serve il server qui sotto e Playwright)
 node tools/compare_routes.js vecchi.json data/strade.json   # cosa cambia nei tragitti tra due versioni
 python3 -m http.server 8765                 # poi apri http://127.0.0.1:8765 (Playwright/Chromium per provarla come un iPhone)
 ```
