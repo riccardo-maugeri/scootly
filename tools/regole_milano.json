@@ -1,0 +1,85 @@
+{
+  "nota": "Regole ufficiali del Comune di Milano che correggono OpenStreetMap. Quando Comune e OSM non sono d'accordo vince il Comune (decisione del proprietario dell'app, 16/10/2026). Fonte: dataset 'Aree pedonali e ZTL' (ds51), campi deroghe/note/ordinanza. Ogni regola aggiunge o sostituisce tag OSM sulle vie indicate (osm = id della way).",
+  "regole": [
+    {
+      "osm": [4877686, 270309542, 272536080, 89885017],
+      "tag": {"motorcycle": "yes"},
+      "motivo": "ZTL Garibaldi (sottoambiti 1 e 2): il Comune ammette i motocicli. OSM le segnava private.",
+      "fonte": "ord. 54515/2004, 1109/2016"
+    },
+    {
+      "osm": [32263785, 168553889, 268577817, 286590820, 286590829],
+      "tag": {"motorcycle": "yes"},
+      "motivo": "ZTL Ticinese: transito consentito a 'cicli e moto'. OSM le segnava vietate.",
+      "fonte": "ord. 97/2017, 52000/2002"
+    },
+    {
+      "osm": [4604803, 4604791, 54054561, 277516087, 333565385, 4604795, 405529934],
+      "tag": {"motorcycle:conditional": "no @ (20:00-07:00)"},
+      "motivo": "ZTL Navigli notturna (Paoli, Pichi-Gola, Borsi): attiva tutti i giorni dalle 20 alle 7, moto non ammesse.",
+      "fonte": "ord. 648/2015"
+    },
+    {
+      "osm": [4893434, 4893449, 5110226, 5110228, 5110232, 5110233, 8154590, 8154591, 115225501, 188280037, 191147359, 191147360, 285282344, 285282348, 285282363, 285282366, 285282367, 285282368, 285282369, 685235526, 685235528, 764675710],
+      "tag": {"motorcycle:conditional": "no @ (22:00-06:00)"},
+      "motivo": "ZTL Arco della Pace: attiva tutti i giorni dalle 22 alle 6, moto non ammesse.",
+      "fonte": "ord. 64502/2010"
+    },
+    {
+      "osm": [4604811, 4604813, 4604816, 4604818, 273644584, 273644586, 273644594, 273644595, 273644600, 277517503, 289424240],
+      "tag": {"motorcycle:conditional": "no @ (Mo-Fr 00:00-06:00,19:00-24:00; Sa,Su 00:00-24:00)"},
+      "motivo": "ZTL Ascanio Sforza: attiva lun-gio dalle 19 alle 6 e dal venerdi' alle 19 al lunedi' alle 6, moto non ammesse.",
+      "fonte": "ord. 1619/2021"
+    },
+    {
+      "osm": [23227361, 111459945, 111866281],
+      "tag": {"motorcycle": "no"},
+      "motivo": "ZTL San Dalmazio - Paolo Ferrari - Filodrammatici: transito solo taxi, pubblica utilita' e autorizzati.",
+      "fonte": "ord. 61945/2008"
+    },
+    {
+      "osm": [4494805, 168553864, 914396996],
+      "tag": {"motorcycle": "no"},
+      "motivo": "ZTL Sant'Agostino - Cesare da Sesto: solo residenti, merci, mercato, box.",
+      "fonte": "ord. 973/2020, 138/2022"
+    },
+    {
+      "osm": [37517888, 224408689],
+      "tag": {"motorcycle": "no"},
+      "motivo": "ZTL San Luigi - Scrivia - Don Bosco: solo residenti, merci, taxi, autorizzati.",
+      "fonte": "ord. 697/2021"
+    },
+    {
+      "osm": [4892135, 30895367, 30895499, 88546039, 118993120, 183860216, 277516082, 1278712314,
+              30689486, 277516085,
+              4604796, 123046290, 168553830, 168553831, 173174615,
+              21629777, 28032419, 168553846, 1083716125, 1083716126, 21772697],
+      "tag": {"motorcycle": "no"},
+      "motivo": "Aree pedonali dei Navigli (Alzaia Naviglio Grande, Ripa di Porta Ticinese, Alzaia Naviglio Pavese, Via Emilio Gola): moto non ammesse.",
+      "fonte": "dataset Aree pedonali e ZTL, tipo AP"
+    },
+    {
+      "osm": [172453240, 168773915, 189734745, 142387176, 27625280, 1514078351, 276506574, 691626286, 4857477,
+              111655183, 273969557, 1446734713, 10753880, 163757303, 274829009, 685460553, 310796751,
+              4520053, 7980551, 7980552, 260839792, 998382959, 280759770, 288215246, 37338857,
+              43015455, 261934242, 262212060, 286590850, 286590873, 286590874, 275209602, 274420185,
+              28734907, 687393623, 998382967, 279397002, 279397003, 42453104, 279743262, 160615595,
+              260362446, 260362447, 183999090],
+      "tag": {"motorcycle": "no"},
+      "motivo": "Aree pedonali del Comune senza deroga per le moto (Brera-Fiori Oscuri, Marconi, Beccaria, Bergamini, Cardinale Federico, Corso Concordia, Colonne di San Lorenzo, Filodrammatici, Foscolo-Berchet, Gramsci, Grassi-Visconti, Pio XI, Pio IV, Pontebba, Romagna, San Calimero, San Tomaso, Santa Croce, Sarpi, Stazione Genova, Tommaseo, Toscana, Giulini, Pattari, Piazza San Marco, XXV Aprile, Magistretti).",
+      "fonte": "dataset Aree pedonali e ZTL, tipo AP"
+    },
+    {
+      "osm": [286594156, 244422646, 327965920, 28660861, 286584352, 295415114],
+      "tag": {"motorcycle": "destination"},
+      "motivo": "Divieti di transito con deroga per i veicoli diretti alle proprieta' (San Calimero 15-19, Lima-Ozanam, Pellico, Via dei Fabbri, Via Puccini): si puo' arrivare, non attraversare.",
+      "fonte": "dataset Aree pedonali e ZTL, tipo DT"
+    },
+    {
+      "osm": [277785529, 1447779440, 328983401, 286588572, 4520096, 284650682, 284650684, 284650694, 330361278, 355390713, 653354501, 1220483964, 1221024722, 175282176, 284650702, 206111233],
+      "tag": {"motorcycle": "no"},
+      "motivo": "Divieti di transito ammessi solo a taxi, bus, tram o autorizzati (Corsia dei Servi, Largo Cairoli-Callas, Cappellari, Dogana, Piazza IV Novembre, Piazza Luigi di Savoia, Via San Marco).",
+      "fonte": "dataset Aree pedonali e ZTL, tipo DT"
+    }
+  ]
+}
