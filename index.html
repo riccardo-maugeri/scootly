@@ -106,9 +106,6 @@ body {
 .tools { position: absolute; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 4; }
 .tool { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--panel-line); background: var(--panel); color: var(--ink); box-shadow: var(--shadow); display: grid; place-items: center; cursor: pointer; font: 600 20px var(--font-body); }
 .tool.on { background: var(--fix); color: #fff; border-color: var(--fix); }
-.tool.rain.on { background: var(--car); border-color: var(--car); color: #fff; }
-.rainbar { padding: 8px 14px; border-top: 1px solid var(--panel-line); font-size: 13.5px; color: var(--ink-soft); display: flex; gap: 8px; align-items: center; }
-.rainbar b { color: var(--car); font-weight: 600; }
 .sub2 { font-size: 12px; color: var(--ink-faint); }
 .warn { font-size: 13px; color: var(--fix); line-height: 1.35; }
 .accbar { padding: 8px 14px; border-top: 1px solid var(--panel-line); }
@@ -134,9 +131,6 @@ body {
 .mode .sub { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .mode.moto .big { color: var(--accent); }
 .mode.car .big { color: var(--car); }
-.gain { padding: 8px 14px; border-top: 1px solid var(--panel-line); font-size: 14px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; }
-.gain b { color: var(--good); font-weight: 600; }
-.gain .more { margin-left: auto; font-family: var(--font-cond); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12px; color: var(--ink-faint); }
 .steps { max-height: 34vh; overflow-y: auto; border-top: 1px solid var(--panel-line); }
 .step { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--panel-line); }
 .step:last-child { border-bottom: 0; }
@@ -169,8 +163,13 @@ body {
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-soft); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; }
-.go { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--panel-line); }
+.go { display: grid; grid-template-columns: 1fr 52px; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--panel-line); }
 .go .btn.primary { font-size: 16px; padding: 12px 10px; }
+.btn.star { font-size: 20px; padding: 8px 0; line-height: 1; color: var(--ink-soft); }
+.btn.star.on { color: #e0a100; }
+.favrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
+.favrow small { color: var(--ink-soft); font-weight: 400; }
+.favrow .btn { padding: 6px 12px; flex: none; }
 [hidden] { display: none !important; }
 body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banner { display: none; }
 .navtop { position: absolute; left: 16px; right: 16px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 7; background: var(--ink); color: var(--panel); border-radius: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; padding: 12px 14px; max-width: 520px; margin: 0 auto; }
@@ -212,9 +211,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   <div class="tools" id="tools">
     <button class="tool" id="fixmode" title="Correggi le strade" aria-label="Correggi le strade" aria-pressed="false">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-    </button>
-    <button class="tool rain" id="rainmode" title="Modalità pioggia" aria-label="Modalità pioggia" aria-pressed="false">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 18 0Z"/><path d="M12 12v7a2 2 0 0 1-4 0"/></svg>
     </button>
     <button class="tool" id="zin" aria-label="Avvicina">+</button>
     <button class="tool" id="zout" aria-label="Allontana">−</button>
@@ -784,7 +780,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
         steps[i].turn = best ? best.turn : 'dritto'; if (best && best.turn === 'rotonda') { steps[i].exitName = best.exitName; steps[i].verso = best.verso; }
       }
       const kept = steps.filter((s, i) => s.len >= 8 || steps.length === 1 || (i > 0 && i < steps.length - 1));
-      return { time: Math.max(1, total - extra), risky: rainM, length, line, turns: turns.map(t => ({ d0: t.d0, turn: t.turn, name: t.name, motoOnly: t.motoOnly, exit: t.exit, exitName: t.exitName, verso: t.verso })), steps: kept.map(s => ({ name: s.name, len: s.len, turn: s.turn, motoOnly: s.motoOnly, way: s.way, d0: s.d0, at: s.at, exitName: s.exitName, verso: s.verso })), start: [S.px, S.py], end: [T.px, T.py], edges: parts.map(p => 2 * p.e + p.dir), d0s, t0s: t0s.map(x => x * (tAcc ? Math.max(1, total - extra) / tAcc : 1)) };
+      return { time: Math.max(1, total - extra), risky: rainM, length, line, turns: turns.map(t => ({ d0: t.d0, ang: t.ang, same: !!t.same, turn: t.turn, name: t.name, motoOnly: t.motoOnly, exit: t.exit, exitName: t.exitName, verso: t.verso })), steps: kept.map(s => ({ name: s.name, len: s.len, turn: s.turn, motoOnly: s.motoOnly, way: s.way, d0: s.d0, at: s.at, exitName: s.exitName, verso: s.verso })), start: [S.px, S.py], end: [T.px, T.py], edges: parts.map(p => 2 * p.e + p.dir), d0s, t0s: t0s.map(x => x * (tAcc ? Math.max(1, total - extra) / tAcc : 1)) };
     }
   }
 
@@ -819,8 +815,12 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   let CASA = null;
   try { const c = JSON.parse(localStorage.getItem('scooter-casa') || 'null'); if (c && c.length === 2) CASA = c; } catch (e) {}
   const casaFav = () => CASA ? { id: 'casa', label: 'Casa', full: 'Casa', p: CASA } : null;
-  const BASE_FAV = []; // niente destinazioni pre-impostate: la destinazione la scrivi tu
-  let FAV = CASA ? [casaFav(), ...BASE_FAV] : BASE_FAV.slice();
+  // Altri posti con un nome scelto da te (es. "Lavoro"), salvati con la stella: solo su questo telefono.
+  // 'scooter-preferiti' = [{ nome, via, p: [x, y] }]
+  let PREF = [];
+  try { const a = JSON.parse(localStorage.getItem('scooter-preferiti') || '[]'); if (Array.isArray(a)) PREF = a.filter(f => f && f.nome && f.p && f.p.length === 2); } catch (e) {}
+  const favList = () => [...(CASA ? [casaFav()] : []), ...PREF.map(f => ({ id: 'pref', label: f.nome, full: f.via || f.nome, p: f.p }))];
+  let FAV = favList();
 
   // ---------- Stato ----------
   const state = {
@@ -887,8 +887,8 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     const use = band.length >= 3 ? band : TRIPS.length >= 3 ? TRIPS : null;
     return use ? { f: Math.max(0.5, Math.min(2, median(use.map(t => t.k)))), n: use.length } : { f: 1, n: 0 };
   }
-  let RAIN = store.get('scooter-pioggia', false);
-  R.setRain(RAIN);
+  // la modalita' pioggia non c'e' piu': si toglie la vecchia impostazione salvata
+  try { localStorage.removeItem('scooter-pioggia'); } catch (e) {}
 
   // ---------- Tempi imparati dai tuoi viaggi ----------
   // Durante ogni viaggio vero (non la prova simulata) si misura quanto ci metti su ogni tratto.
@@ -1465,8 +1465,8 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
     const topPad = document.querySelector('.top').getBoundingClientRect().bottom + 10;
-    const card = document.getElementById('card').getBoundingClientRect();
-    const botPad = Math.max(20, Hp - card.top + 10);
+    const cardEl = document.getElementById('card'), card = cardEl.getBoundingClientRect();
+    const botPad = cardEl.hidden ? 20 : Math.max(20, Hp - card.top + 10);
     const availH = Math.max(120, Hp - topPad - botPad), availW = Math.max(120, Wp - 90);
     view.s = Math.min(availW / Math.max(x1 - x0, 50), availH / Math.max(y1 - y0, 50), 2.5);
     view.cx = (x0 + x1) / 2 + 20 / view.s;
@@ -1511,14 +1511,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   document.getElementById('zin').addEventListener('click', () => { zoomAt(Wp / 2, Hp / 2, 1.5); redraw(); });
   document.getElementById('zout').addEventListener('click', () => { zoomAt(Wp / 2, Hp / 2, 1 / 1.5); redraw(); });
   document.getElementById('fit').addEventListener('click', fitRoute);
-  const rainBtn = document.getElementById('rainmode');
-  function rainUI() { rainBtn.classList.toggle('on', RAIN); rainBtn.setAttribute('aria-pressed', RAIN); }
-  rainBtn.addEventListener('click', () => {
-    RAIN = !RAIN; store.set('scooter-pioggia', RAIN); R.setRain(RAIN); rainUI();
-    toast(RAIN ? 'Pioggia: evito pavé e binari del tram' : 'Pioggia spenta: percorso più veloce');
-    compute(true); render();
-  });
-  rainUI();
   const fixBtn = document.getElementById('fixmode');
   fixBtn.addEventListener('click', () => {
     state.fix = !state.fix; state.selWay = null; state.pick = null;
@@ -1534,9 +1526,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       if (!sn || sn.dist * view.s > 30) { state.selWay = null; render(); redraw(); return; }
       state.selWay = W[EDGES[sn.e][2]][0]; state.pick = null; render(); redraw(); return;
     }
-    state.pick = sn && sn.dist * view.s < 40 ? [sn.px, sn.py] : [x, y];
-    state.pickName = sn ? (NAMES[W[EDGES[sn.e][2]][1]] || 'Strada senza nome') : 'Punto sulla mappa';
-    render(); redraw();
   }
 
   // ---------- Scheda ----------
@@ -1564,6 +1553,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   function closeUntil(days) { const d = new Date(); d.setHours(23, 59, 0, 0); d.setDate(d.getDate() + days); return d.toISOString(); }
 
   function render() {
+    card.hidden = false;
     // correzione
     if (state.fix) {
       if (state.selWay == null) {
@@ -1574,17 +1564,24 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
           <div class="row"><button class="btn" id="exitfix">Fine correzioni</button><button class="btn" id="more" aria-expanded="${!!state.more}">${state.more ? 'Meno' : 'Altro…'}</button></div>
           <div class="more" ${state.more ? '' : 'hidden'}>
           ${MAP_DATE ? `<p class="sub2">Mappa OpenStreetMap del ${MAP_DATE}, con le regole del Comune di Milano${META.civici ? ` e i numeri civici ufficiali del ${fmtDate(META.civici)}` : ''}.</p>` : ''}
+          ${FAV.length ? `<h4>Preferiti</h4><p>Per aggiungerne uno: cerca l'arrivo e tocca la stella ☆ accanto a "Vai".</p><div class="favlist">${FAV.map((f, i) => `<div class="favrow"><span><b>${esc(f.label)}</b>${f.id === 'pref' ? ` <small>${esc(f.full)}</small>` : ''}</span><button class="btn" data-delfav="${i}">Togli</button></div>`).join('')}</div>` : ''}
           <h4>Tempi imparati</h4>
           <p>${TEMPI.viaggi ? `Le stime usano i tuoi tempi veri: ${TEMPI.viaggi} ${TEMPI.viaggi === 1 ? 'viaggio' : 'viaggi'}, ${Object.keys(TEMPI.w).length} vie misurate.` : 'Ancora nessun viaggio: dopo il primo viaggio con "Vai" le stime useranno i tuoi tempi veri.'}</p>
           ${TEMPI.viaggi ? '<button class="btn" id="tempi-reset">Azzera i tempi imparati</button>' : ''}
           <h4>Copia di sicurezza</h4>
-          <p>Salva in un codice le tue correzioni, Casa, le ultime destinazioni e i tempi imparati. Incollalo in una Nota (o mandalo a Claude): se l'app si cancella, lo rimetti con "Ripristina".</p>
+          <p>Salva in un codice le tue correzioni, Casa e gli altri preferiti, le ultime destinazioni e i tempi imparati. Incollalo in una Nota (o mandalo a Claude): se l'app si cancella, lo rimetti con "Ripristina".</p>
           <div class="row"><button class="btn" id="bk-copy">Copia codice</button><button class="btn" id="bk-restore">Ripristina</button></div>
           <div class="backup" id="bk-box" hidden></div>
           </div></div>`;
         card.querySelector('#exitfix').onclick = () => fixBtn.click();
         card.querySelector('#more').onclick = () => { state.more = !state.more; render(); };
         card.querySelector('#bk-copy').onclick = backupCopy;
+        card.querySelectorAll('[data-delfav]').forEach(b => b.onclick = () => {
+          const f = FAV[+b.dataset.delfav]; if (!f || !confirm(`Togliere "${f.label}" dai preferiti?`)) return;
+          if (f.id === 'casa') { CASA = null; try { localStorage.removeItem('scooter-casa'); } catch (e) {} FAV = favList(); buildChips(); }
+          else { PREF = PREF.filter(x => x.nome !== f.label); savePref(); }
+          render();
+        });
         const tr = card.querySelector('#tempi-reset');
         if (tr) tr.onclick = () => {
           if (!confirm('Vuoi dimenticare i tempi imparati dai tuoi viaggi?')) return;
@@ -1611,29 +1608,10 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       card.querySelector('#closesel').onclick = () => { state.selWay = null; render(); redraw(); };
       return;
     }
-    // punto toccato
-    if (state.pick) {
-      card.innerHTML = `<div class="pane"><h3>${esc(state.pickName)}</h3><p>Punto toccato sulla mappa.</p>
-        <div class="row"><button class="btn" id="setfrom">Parti da qui</button><button class="btn primary" id="setto">Arriva qui</button></div>
-        <button class="btn" id="setcasa">Salva come Casa</button>
-        <button class="btn" id="cancelpick">Annulla</button></div>`;
-      card.querySelector('#setfrom').onclick = () => { state.from = { label: state.pickName, p: state.pick, manual: true }; state.pick = null; syncInputs(); compute(true); render(); };
-      card.querySelector('#setto').onclick = () => { state.to = { label: state.pickName, p: state.pick }; addRecent(state.to); state.pick = null; syncInputs(); compute(true); render(); };
-      card.querySelector('#setcasa').onclick = () => {
-        CASA = [Math.round(state.pick[0]), Math.round(state.pick[1])];
-        try { localStorage.setItem('scooter-casa', JSON.stringify(CASA)); } catch (e) {}
-        FAV = [casaFav(), ...BASE_FAV]; buildChips();
-        state.from = { label: 'Casa', p: CASA }; state.pick = null; syncInputs(); compute(true); render();
-        toast('Casa salvata su questo telefono');
-      };
-      card.querySelector('#cancelpick').onclick = () => { state.pick = null; render(); redraw(); };
-      return;
-    }
     const m = state.moto, c = state.car;
-    if (!state.to) {
-      card.innerHTML = `<div class="pane"><h3>Dove vai?</h3><p>${state.from ? 'Scrivi la destinazione nel campo "A", oppure tocca un punto sulla mappa.' : 'Cerco la tua posizione… Intanto puoi scrivere la destinazione nel campo "A".'}</p>${accText(state.from)}${MAP_DATE ? `<p class="sub2">Mappa aggiornata al ${MAP_DATE}</p>` : ''}</div>`;
-      return;
-    }
+    // senza destinazione la scheda non c'e': resta solo la mappa
+    card.hidden = !state.to;
+    if (!state.to) { card.innerHTML = ''; return; }
     if (!state.from) {
       card.innerHTML = `<div class="pane"><h3>Cerco la tua posizione…</h3><p>Se non arriva, controlla che Safari possa usare la posizione, oppure scrivi la partenza nel campo "Da".</p></div>`;
       return;
@@ -1643,12 +1621,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       return;
     }
     const MF = timeFactor(), mt = m.time * MF.f;
-    const gain = c ? Math.round((c.time - mt) / 60) : 0;
-    const motoOnlyM = m.steps.filter(s => s.motoOnly).reduce((a, s) => a + s.len, 0);
-    let gainTxt;
-    if (!c) gainTxt = 'In auto non si arriva: solo lo scooter può.';
-    else if (gain >= 1) gainTxt = `In scooter risparmi <b>${gain} min</b>` + (motoOnlyM > 30 ? `, anche grazie a ${fmtKm(motoOnlyM)} su strade vietate alle auto` : '');
-    else gainTxt = 'Qui scooter e auto fanno praticamente la stessa strada.';
     let steps = '';
     if (state.expanded) {
       steps = '<div class="steps">' + m.steps.map((s, i) => `<div class="step"><span class="ic">${ic(i === 0 ? 'start' : s.turn)}</span>
@@ -1659,17 +1631,47 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
         <span class="mode moto"><span class="lab"><i style="background:var(--accent)"></i>In scooter</span><span class="big">${fmtMin(mt)}</span><span class="sub">${fmtKm(m.length)}${MF.n ? ` · <span class="sub2">sui tuoi ${MF.n} viaggi</span>` : ''}</span></span>
         <span class="mode car"><span class="lab"><i style="background:var(--car)"></i>In auto</span><span class="big">${c ? fmtMin(c.time) : 'no'}</span><span class="sub">${c ? fmtKm(c.length) : 'nessun percorso'}</span></span>
       </button>
-      <div class="gain"><span>${gainTxt}</span><span class="more">${state.expanded ? 'Chiudi' : 'Strade'}</span></div>
       ${state.from.gps && (state.from.coarse || state.from.acc > 40) ? `<div class="accbar">${accText(state.from)}</div>` : ''}
-      ${RAIN ? `<div class="rainbar"><b>Pioggia</b><span>${m.risky > 80 ? `Evito il più possibile pavé e rotaie del tram: ne restano ${fmtKm(m.risky)}, vai piano lì.` : 'Percorso senza pavé né rotaie del tram.'}</span></div>` : ''}${steps}
-      <div class="go"><button class="btn primary" id="go">Vai</button><button class="btn" id="simgo">Prova simulata</button></div>`;
+${steps}
+      <div class="go"><button class="btn primary" id="go">Vai</button>${favBtn()}</div>`;
     card.querySelector('#go').onclick = () => startNav(false);
-    card.querySelector('#simgo').onclick = () => startNav(true);
+    card.querySelector('#favbtn').onclick = toggleFav;
     card.querySelector('#toggle').onclick = () => { state.expanded = !state.expanded; render(); fitRoute(); };
-    card.querySelector('.gain').onclick = () => { state.expanded = !state.expanded; render(); fitRoute(); };
   }
 
-  function backupData() { return JSON.stringify({ app: 'scooter-milano', v: 1, casa: CASA, corr: state.corr, recenti: RECENT, viaggi: TRIPS, tempi: TEMPI, pioggia: RAIN }); }
+  // ---------- Stella: salva l'arrivo con un nome (es. "Lavoro") ----------
+  const near30 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]) < 30;
+  const favAt = p => FAV.find(f => near30(f.p, p));
+  function favBtn() {
+    const f = state.to && !state.to.gps && favAt(state.to.p);
+    return f ? `<button class="btn star on" id="favbtn" aria-label="Salvato come ${esc(f.label)}: tocca per toglierlo">★</button>`
+      : '<button class="btn star" id="favbtn" aria-label="Salva questo arrivo con un nome">☆</button>';
+  }
+  function savePref() { try { localStorage.setItem('scooter-preferiti', JSON.stringify(PREF)); } catch (e) {} FAV = favList(); buildChips(); }
+  function toggleFav() {
+    const t = state.to; if (!t || !t.p) return;
+    const f = favAt(t.p);
+    if (f) {
+      if (!confirm(`Togliere "${f.label}" dai preferiti?`)) return;
+      if (f.id === 'casa') { CASA = null; try { localStorage.removeItem('scooter-casa'); } catch (e) {} FAV = favList(); buildChips(); }
+      else { PREF = PREF.filter(x => !near30(x.p, t.p)); savePref(); }
+      toast(`"${f.label}" tolto dai preferiti`); render(); return;
+    }
+    let nome = prompt('Che nome gli dai? (es. Lavoro, Palestra)', PREF.some(x => x.nome.toLowerCase() === 'lavoro') ? '' : 'Lavoro');
+    nome = (nome || '').trim().slice(0, 24); if (!nome) return;
+    const p = [Math.round(t.p[0]), Math.round(t.p[1])];
+    if (nome.toLowerCase() === 'casa') {
+      CASA = p; try { localStorage.setItem('scooter-casa', JSON.stringify(CASA)); } catch (e) {}
+      FAV = favList(); buildChips();
+    } else {
+      // stesso nome: si sostituisce il posto vecchio (es. hai cambiato ufficio)
+      PREF = [...PREF.filter(x => x.nome.toLowerCase() !== nome.toLowerCase()), { nome, via: t.label, p }];
+      savePref();
+    }
+    toast(`Salvato: "${nome}" ora è in alto, accanto a Casa`); render();
+  }
+
+  function backupData() { return JSON.stringify({ app: 'scooter-milano', v: 1, casa: CASA, preferiti: PREF, corr: state.corr, recenti: RECENT, viaggi: TRIPS, tempi: TEMPI }); }
   async function backupCopy() {
     const txt = backupData(), box = document.getElementById('bk-box');
     try { await navigator.clipboard.writeText(txt); toast('Codice copiato: incollalo in una Nota'); }
@@ -1684,12 +1686,12 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     box.querySelector('#bk-go').onclick = () => {
       let d; try { d = JSON.parse(box.querySelector('#bk-in').value.trim()); } catch (e) { toast('Codice non valido: incollalo tutto, dalla { alla }'); return; }
       if (!d || d.app !== 'scooter-milano') { toast('Questo non sembra un codice dell\'app'); return; }
-      if (d.casa) { CASA = d.casa; store.set('scooter-casa', CASA); FAV = [casaFav(), ...BASE_FAV]; buildChips(); }
+      if (d.casa) { CASA = d.casa; store.set('scooter-casa', CASA); FAV = favList(); buildChips(); }
+      if (Array.isArray(d.preferiti)) { PREF = d.preferiti.filter(f => f && f.nome && f.p && f.p.length === 2); savePref(); }
       if (d.corr) { state.corr = d.corr; saveLocal(); R.setCorrections(flatCorr()); }
       if (d.recenti) { RECENT = d.recenti; store.set('scooter-recenti', RECENT); }
       if (d.viaggi) { TRIPS = d.viaggi; store.set('scooter-viaggi', TRIPS); }
       if (d.tempi && d.tempi.v === 1) { TEMPI = d.tempi; store.set('scooter-tempi', TEMPI); applyLearned(); }
-      if (typeof d.pioggia === 'boolean') { RAIN = d.pioggia; store.set('scooter-pioggia', RAIN); R.setRain(RAIN); rainUI(); }
       toast('Ripristinato'); compute(false); render(); redraw();
     };
   }
@@ -1822,18 +1824,67 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     const seg = cum[hi] - cum[lo], t = seg > 0 ? Math.max(0, Math.min(1, (along - cum[lo]) / seg)) : 0;
     return { p: [L[lo][0] + (L[hi][0] - L[lo][0]) * t, L[lo][1] + (L[hi][1] - L[lo][1]) * t], h: Math.atan2(L[hi][1] - L[lo][1], L[hi][0] - L[lo][0]) };
   }
-  const PHRASE = { 'a sinistra': 'gira a sinistra', 'a destra': 'gira a destra', 'leggermente a sinistra': 'tieni la sinistra', 'leggermente a destra': 'tieni la destra' };
+  // ---------- Voce: come Google Maps ----------
+  // Frasi e momenti come il navigatore di Google. Per ogni manovra, al massimo tre frasi, a tempi
+  // che dipendono dalla velocita' (v, in m/s, almeno 25 km/h):
+  //  1. appena fatta la manovra precedente, se la prossima e' lontana: "Continua su Via X per 800 metri"
+  //  2. preavviso, circa 22 s prima (almeno 160 m):                "Tra 200 metri, svolta a destra in Via X"
+  //  3. all'incrocio, circa 7 s prima (almeno 35 m):                 "Svolta a destra in Via X" (+ ", poi ..." se la seguente e' subito dopo)
+  // L'arrivo e' l'ultima "manovra": "Tra 100 metri, la destinazione si trova sulla destra".
+  const VERB = { 'a sinistra': 'svolta a sinistra', 'a destra': 'svolta a destra', 'leggermente a sinistra': 'svolta leggermente a sinistra', 'leggermente a destra': 'svolta leggermente a destra', 'dritto': 'prosegui dritto' };
+  const named = st => !!st.name && st.name !== 'strada senza nome';
   function phrase(st) {
-    const named = st.name && st.name !== 'strada senza nome';
-    if (st.turn === 'rotonda') return `alla rotonda prendi la ${st.exitName} uscita, ${st.verso}` + (named ? `, in ${st.name}` : '');
-    const base = PHRASE[st.turn] || 'prosegui'; return named ? `${base} in ${st.name}` : base;
+    if (st.arrive) return arriveText();
+    if (st.turn === 'rotonda') return `alla rotonda prendi la ${st.exitName} uscita` + (named(st) ? ` e imbocca ${st.name}` : '');
+    const a = Math.abs(st.ang || 0);
+    const v = a > 2.7 ? "fai un'inversione a U" : a > 2.2 && (st.turn === 'a sinistra' || st.turn === 'a destra') ? 'svolta nettamente ' + st.turn : VERB[st.turn] || 'prosegui';
+    if (!named(st)) return v;
+    return st.same ? `${v} per rimanere su ${st.name}` : `${v} in ${st.name}`;
   }
+  // da che parte e' l'arrivo, guardando nel verso di marcia dell'ultimo tratto
+  function arriveSide() {
+    const r = nav.route, L = r.line, n = L.length; if (n < 2 || !state.to) return '';
+    const [x1, y1] = L[n - 2], [x2, y2] = L[n - 1], dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy) || 1;
+    const tx = state.to.p[0] - x2, ty = state.to.p[1] - y2;
+    if (Math.hypot(tx, ty) < 8) return '';
+    const cross = (dx * ty - dy * tx) / l, fwd = (dx * tx + dy * ty) / l;
+    if (Math.abs(cross) < 6 || Math.abs(cross) < Math.abs(fwd) * 0.5) return '';
+    return cross > 0 ? 'sulla sinistra' : 'sulla destra';
+  }
+  const walkM = () => state.to && nav.route ? Math.hypot(state.to.p[0] - nav.route.end[0], state.to.p[1] - nav.route.end[1]) : 0;
+  function arriveText() { const sd = arriveSide(); return sd ? `la destinazione si trova ${sd}` : 'arriverai a destinazione'; }
+  function arrivedText() {
+    const w = walkM();
+    if (w > 40) return `Sei arrivato. Lascia qui lo scooter: la destinazione è a ${distText(w)} a piedi.`;
+    const sd = arriveSide(); return sd ? `La destinazione si trova ${sd}.` : 'Sei arrivato a destinazione.';
+  }
+  // distanze dette come Google: 50, 100, 150... 300, 400... metri; poi 1, 1,5, 2 chilometri
+  function distText(d) {
+    if (d >= 950) { const km = Math.round(d / 500) / 2; return km === 1 ? '1 chilometro' : `${String(km).replace('.', ',')} chilometri`; }
+    const m = d > 300 ? Math.round(d / 100) * 100 : d > 90 ? Math.round(d / 50) * 50 : Math.max(10, Math.round(d / 10) * 10);
+    return `${m} metri`;
+  }
+  // scritta in alto nella guida: "200 m", "1,2 km"
+  const round = d => d >= 1000 ? (Math.round(d / 100) / 10).toFixed(1).replace('.', ',') + ' km' : (d > 300 ? Math.round(d / 100) * 100 : d > 90 ? Math.round(d / 50) * 50 : Math.max(10, Math.round(d / 10) * 10)) + ' m';
+  const COMPASS = ['est', 'nord-est', 'nord', 'nord-ovest', 'ovest', 'sud-ovest', 'sud', 'sud-est'];
+  const compass = h => COMPASS[((Math.round(h / (Math.PI / 4)) % 8) + 8) % 8];
+  // La voce: la migliore voce italiana del telefono. Le voci "Avanzata"/"Premium" (da scaricare in
+  // Impostazioni > Accessibilita' > Contenuti letti > Voci > Italiano) sono le piu' naturali.
   let itVoice = null;
-  function say(t) {
-    if (!nav.voice || !window.speechSynthesis) return;
+  function pickVoice() {
     try {
-      if (!itVoice) itVoice = speechSynthesis.getVoices().find(v => /^it/i.test(v.lang)) || null;
-      const u = new SpeechSynthesisUtterance(t); u.lang = 'it-IT'; if (itVoice) u.voice = itVoice; u.rate = 1.05;
+      const vs = speechSynthesis.getVoices().filter(v => /^it/i.test(v.lang)); if (!vs.length) return;
+      const score = v => (/premium/i.test(v.name) ? 4 : 0) + (/enhanced|avanzat|migliorat/i.test(v.name) ? 3 : 0) + (/federica|alice|emma|paola|elsa/i.test(v.name) ? 1 : 0) + (v.localService ? 0.5 : 0);
+      itVoice = vs.sort((a, b) => score(b) - score(a))[0];
+    } catch (e) {}
+  }
+  if (window.speechSynthesis) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {} }
+  function say(t) {
+    if (!nav.voice || !window.speechSynthesis || !t) return;
+    try {
+      if (!itVoice) pickVoice();
+      speechSynthesis.cancel(); // l'indicazione nuova sostituisce quella vecchia, come Google
+      const u = new SpeechSynthesisUtterance(t); u.lang = 'it-IT'; if (itVoice) u.voice = itVoice; u.rate = 1; u.pitch = 1;
       speechSynthesis.speak(u);
     } catch (e) {}
   }
@@ -1842,16 +1893,72 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     for (let k = 0; k < tu.length; k++) if (tu[k].d0 > nav.along + 2) return { k, st: tu[k], dist: tu[k].d0 - nav.along };
     return null;
   }
-  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
-  // frase completa per la prossima indicazione (usata alla partenza e dopo un ricalcolo)
-  function instruction(nt, remaining) {
-    if (!nt) return `Prosegui per ${round(remaining)} metri fino all'arrivo.`;
-    if (nt.dist <= 40) { nav.spoken[nt.k + 'n'] = nav.spoken[nt.k + 'f'] = 1; return cap(phrase(nt.st)) + '.'; }
-    if (nt.dist <= 170) { nav.spoken[nt.k + 'f'] = 1; return `Tra ${round(nt.dist)} metri, ${phrase(nt.st)}.`; }
-    nav.spoken[nt.k + 'p'] = 1;
-    return `Prosegui per ${round(nt.dist)} metri, poi ${phrase(nt.st)}.`;
+  // prossima manovra per la voce: le svolte e, alla fine, l'arrivo
+  function nextMan() {
+    const nt = nextTurn(); if (nt) return nt;
+    const k = (nav.route.turns || []).length;
+    return { k, st: { arrive: true, d0: nav.route.length }, dist: Math.max(0, nav.route.length - nav.along) };
   }
-  const round = d => d > 250 ? Math.round(d / 100) * 100 : d > 60 ? Math.round(d / 50) * 50 : Math.max(10, Math.round(d / 10) * 10);
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  // velocita' per decidere quando parlare: media degli ultimi secondi (un singolo salto del GPS non anticipa la voce)
+  const speedV = () => Math.max(7, Math.min(20, nav.vs || 0));
+  const limits = () => { const v = speedV(); return { act: Math.min(130, Math.max(35, v * 7)), prep: Math.max(160, v * 22) }; };
+  // via su cui sei adesso
+  function streetNow() {
+    const st = nav.route.steps || []; let nm = '';
+    for (const s of st) { if (s.d0 <= nav.along + 1) nm = s.name; else break; }
+    return nm && nm !== 'strada senza nome' ? nm : '';
+  }
+  // frase all'incrocio, con la manovra seguente se arriva subito dopo
+  function actionText(m) {
+    let t = cap(phrase(m.st));
+    if (!m.st.arrive) {
+      const TU = nav.route.turns, n2 = TU[m.k + 1], gap = n2 ? n2.d0 - m.st.d0 : nav.route.length - m.st.d0;
+      if (gap < Math.max(60, speedV() * 6)) {
+        if (n2) { t += ', poi ' + phrase(n2); nav.spoken[(m.k + 1) + 'p'] = nav.spoken[(m.k + 1) + 'c'] = 1; }
+        else { t += ', poi ' + arriveText(); nav.spoken[(m.k + 1) + 'p'] = nav.spoken[(m.k + 1) + 'c'] = 1; }
+      }
+    }
+    nav.spoken[m.k + 'a'] = nav.spoken[m.k + 'p'] = nav.spoken[m.k + 'c'] = 1;
+    return t + '.';
+  }
+  function prepText(m) { nav.spoken[m.k + 'p'] = nav.spoken[m.k + 'c'] = 1; return `Tra ${distText(m.dist)}, ${phrase(m.st)}.`; }
+  function contText(m) {
+    nav.spoken[m.k + 'c'] = 1; nav.spoken[m.k + 'cd'] = m.dist; const nm = streetNow();
+    return nm ? `Continua su ${nm} per ${distText(m.dist)}.` : `Continua per ${distText(m.dist)}.`;
+  }
+  // l'indicazione giusta adesso (alla partenza e dopo un ricalcolo)
+  function instruction() {
+    const m = nextMan(), { act, prep } = limits();
+    if (m.dist <= act) return actionText(m);
+    if (m.dist <= prep + 60) return prepText(m);
+    return contText(m);
+  }
+  // frase della partenza: "Procedi in direzione nord su Via X", poi la prima indicazione se e' vicina
+  function startText() {
+    const L = nav.route.line; let i = 1; while (i < L.length - 1 && Math.hypot(L[i][0] - L[0][0], L[i][1] - L[0][1]) < 15) i++;
+    const h = L.length > 1 ? Math.atan2(L[i][1] - L[0][1], L[i][0] - L[0][0]) : Math.PI / 2;
+    const nm = (nav.route.steps[0] || {}).name;
+    let t = `Procedi in direzione ${compass(h)}` + (nm && nm !== 'strada senza nome' ? ` su ${nm}` : '');
+    const m = nextMan(), { act, prep } = limits();
+    nav.spoken[m.k + 'c'] = 1;
+    if (m.dist <= act) t += ', poi ' + actionText(m).replace(/\.$/, '').replace(/^./, c => c.toLowerCase());
+    else if (m.dist <= prep + 60) t += ', poi tra ' + distText(m.dist) + ' ' + phrase(m.st);
+    return t + '.';
+  }
+  // da chiamare a ogni lettura GPS: dice la frase giusta al momento giusto
+  function voiceTick() {
+    const m = nextMan(), { act, prep } = limits(), k = m.k, TU = nav.route.turns || [], prev = TU[k - 1];
+    const doneManeuver = !prev || nav.along > prev.d0 + 15;
+    if (m.dist <= act) { if (!nav.spoken[k + 'a'] && !m.st.arrive) say(actionText(m)); return; }
+    if (m.dist <= prep) { if (!nav.spoken[k + 'p'] && m.dist > act + 25) say(prepText(m)); return; }
+    if (doneManeuver && !nav.spoken[k + 'c'] && !nav.spoken[k + 'p']) {
+      if (m.dist <= prep + 150) say(prepText(m)); else say(contText(m));
+      return;
+    }
+    // tratto lungo (oltre 2 km): un promemoria a 1 km
+    if (m.dist <= 1050 && m.dist > prep + 300 && !nav.spoken[k + 'm'] && nav.spoken[k + 'c'] && nav.spoken[k + 'cd'] > 1800) { nav.spoken[k + 'm'] = 1; say(`Tra 1 chilometro, ${phrase(m.st)}.`); }
+  }
   function angleTo(a, b, f) { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * f; }
 
   // g = dati della lettura GPS: { acc: precisione in m, heading: direzione (radianti), speed: m/s }
@@ -1883,29 +1990,13 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       nav.idx = pr.i; nav.along = pr.along;
     } else if (g.heading != null) nav.heading = angleTo(nav.heading, g.heading, 0.5);
     if (g.speed != null && g.speed >= 0) nav.speed = g.speed;
+    if (nav.speed != null) nav.vs = nav.vs == null ? nav.speed : nav.vs * 0.8 + nav.speed * 0.2;
     nav.onRoute = onRoute; nav.fixT = now;
     const remaining = Math.max(0, nav.route.length - nav.along);
-    if (onRoute && remaining < 20 && !nav.arrived) { nav.arrived = true; saveTrip(); say('Sei arrivato.'); toast('Sei arrivato'); setTimeout(stopNav, 2500); }
+    if (onRoute && remaining < 20 && !nav.arrived) { nav.arrived = true; saveTrip(); say(arrivedText()); toast('Sei arrivato'); setTimeout(stopNav, 4000); }
     const nt = nextTurn();
-    if (nav.announce != null && !nav.arrived) { say(nav.announce + instruction(nt, remaining)); nav.announce = null; }
-    else if (nt && !nav.arrived) {
-      const key = nt.k;
-      const TU = nav.route.turns, prev = TU[key - 1];
-      // 1) appena fatta la manovra precedente: annuncia subito la prossima
-      if (!nav.spoken[key + 'p'] && nt.dist > 170 && (!prev || nav.along > prev.d0 + 20)) {
-        nav.spoken[key + 'p'] = 1; say(`Prosegui per ${round(nt.dist)} metri, poi ${phrase(nt.st)}.`);
-      }
-      // 2) circa 150 metri prima
-      else if (nt.dist <= 170 && nt.dist > 60 && !nav.spoken[key + 'f']) { nav.spoken[key + 'f'] = nav.spoken[key + 'p'] = 1; say(`Tra ${round(nt.dist)} metri, ${phrase(nt.st)}.`); }
-      // 3) proprio all'incrocio (e, se la manovra dopo e' vicinissima, anche quella)
-      else if (nt.dist <= 35 && !nav.spoken[key + 'n']) {
-        nav.spoken[key + 'n'] = nav.spoken[key + 'f'] = nav.spoken[key + 'p'] = 1;
-        let t = cap(phrase(nt.st));
-        const n2 = TU[key + 1];
-        if (n2 && n2.d0 - nt.st.d0 < 70) { t += ', poi subito ' + phrase(n2); nav.spoken[(key + 1) + 'p'] = nav.spoken[(key + 1) + 'f'] = 1; }
-        say(t + '.');
-      }
-    }
+    if (nav.announce != null && !nav.arrived) { say(nav.announce + instruction()); nav.announce = null; }
+    else if (!nav.arrived && onRoute) voiceTick();
     nav.dirty = true; // nuova lettura: ridisegna almeno una volta
     renderNav(nt, remaining); startAnim();
   }
@@ -2029,7 +2120,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     const counted = recFlush(); // il pezzo gia' fatto vale comunque per imparare (true = viaggio gia' contato)
     state.moto = r; state.car = null; prepRoute(r); recStart();
     if (nav.rec && counted) nav.rec.counted = true; // stesso viaggio: non contarlo due volte
-    nav.announce = typeof announce === 'string' ? announce : announce ? 'Ricalcolo il percorso. ' : '';
+    nav.announce = typeof announce === 'string' ? announce : '';
     nav.fixT = 0;
     update(p, { acc: nav.acc, heading, speed: nav.speed });
   }
@@ -2037,11 +2128,11 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     const ic2 = k => `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${TURN_IC[k] || TURN_IC.dritto}</svg>`;
     if (nt) {
       document.getElementById('nt-ic').innerHTML = ic2(nt.st.turn);
-      document.getElementById('nt-dist').textContent = round(nt.dist) + ' m';
+      document.getElementById('nt-dist').textContent = round(nt.dist);
       document.getElementById('nt-name').innerHTML = (nt.st.turn === 'rotonda' ? `Rotonda: ${esc(nt.st.exitName)} uscita, ${esc(nt.st.verso)}<br>` : '') + esc(nt.st.name) + (nt.st.motoOnly ? '<span class="tag">solo moto</span>' : '');
     } else {
       document.getElementById('nt-ic').innerHTML = ic2('arrivo');
-      document.getElementById('nt-dist').textContent = round(remaining) + ' m';
+      document.getElementById('nt-dist').textContent = round(remaining);
       document.getElementById('nt-name').textContent = 'Arrivo: ' + (state.to ? state.to.label : '');
     }
     const secs = Math.max(0, nav.route.time - timeAt(nav.along)) * timeFactor().f;
@@ -2060,7 +2151,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     if (!state.moto || !state.to) return;
     stopLocate(); // in navigazione il GPS lo ascolta la navigazione stessa
     nav.on = true; nav.sim = sim; nav.follow = true; nav.first = !sim; nav.arrived = false; nav.pos = null;
-    nav.speed = null; nav.fixT = 0; nav.acc = 5; nav.disp = null; nav.goodT = Date.now(); nav.weak = false; nav.outWarned = false;
+    nav.speed = null; nav.vs = null; nav.fixT = 0; nav.acc = 5; nav.disp = null; nav.goodT = Date.now(); nav.weak = false; nav.outWarned = false;
     nav.trip = sim ? null : { t0: Date.now(), pred: state.moto.time, len: state.moto.length, rer: 0, h: new Date().getHours() };
     prepRoute(state.moto); recStart();
     document.body.classList.add('navmode'); navtop.hidden = false; navbot.hidden = false;
@@ -2069,7 +2160,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     { const L0 = state.moto.line, h0 = L0.length > 1 ? Math.atan2(L0[1][1] - L0[0][1], L0[1][0] - L0[0][0]) : Math.PI / 2;
       nav.disp = L0[0].slice(); nav.heading = h0; view.rot = Math.PI / 2 - h0; view.cx = nav.disp[0]; view.cy = nav.disp[1]; }
     nav.announce = null;
-    say((sim ? 'Simulazione. Partiamo. ' : 'Partiamo. ') + instruction(nextTurn(), nav.route.length));
+    say(startText());
     keepAwake();
     if (sim) {
       nav.simD = 0; const speed = 8.5 * 3; // circa 30 km/h, 3 volte più veloce

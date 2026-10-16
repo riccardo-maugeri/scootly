@@ -86,7 +86,8 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
   non finiscono in vicoli isolati. La rete si ricalcola quando cambiano regole a orario o correzioni.
 - `snap(x, y, mode, heading)` / `route(from, to, mode, { heading })`: con la direzione di marcia la partenza
   va sulla strada e nel verso coerenti (usato nei ricalcoli in navigazione).
-- Modalità pioggia: pavé ×2,5 e binari del tram ×3 nel costo (non nel tempo mostrato).
+- Modalità pioggia (`setRain`): pavé ×2,5 e binari del tram ×3 nel costo. Resta nel motore ma l'app non la usa più
+  (tolta su richiesta del proprietario; la vecchia chiave `scooter-pioggia` si cancella all'avvio).
 - Correzioni dell'utente per osmId: `vietata`, `aperta`, `senso`, `senso_inv`, `evita` (×3), `preferita` (×0,7),
   `chiusa` (per lavori, con `fino`: data ISO; scaduta = ignorata e tolta da `purgeExpired()`). In guida il
   pulsante "Strada chiusa" propone la via attuale e le prossime entro 400 m e le chiude per 3 giorni
@@ -112,13 +113,21 @@ In guida ~16 ms per immagine nel browser di prova.
   direzione; fuori percorso se oltre max(30, precisione+15) m per 2 letture e 3 s (o verso opposto per
   3 letture); `animFrame()` fa scorrere l'icona lungo la strada a ~30 fps stimando con la velocità.
   Prova di guida simulata nel browser: rumore ±10 m e una lettura sbagliata di 70 m → 0 ricalcoli.
+- Voce (come Google Maps, `voiceTick()`): per ogni manovra al massimo tre frasi, con tempi che dipendono
+  dalla velocità media `nav.vs` (almeno 25 km/h): appena fatta la manovra precedente "Continua su Via X per
+  800 metri" (se la prossima è lontana), preavviso ~22 s prima (≥ 160 m) "Tra 200 metri, svolta a destra in
+  Via X", all'incrocio ~7 s prima (35–130 m) "Svolta a destra in Via X" (+ ", poi ..." se la seguente è entro
+  max(60 m, 6 s)). Partenza: "Procedi in direzione nord su ...". Arrivo: "la destinazione si trova sulla
+  destra/sinistra" (o quanti metri a piedi). Ricalcolo in silenzio, poi la nuova indicazione. Usa la migliore
+  voce italiana del telefono (preferisce le voci "Avanzata"/"Premium").
 
 ### Dati salvati sul telefono (`localStorage`)
 
-`scooter-corr` (correzioni), `scooter-casa`, `scooter-recenti`, `scooter-viaggi` (vecchio confronto
+`scooter-corr` (correzioni), `scooter-casa`, `scooter-preferiti` (altri posti con un nome, es. "Lavoro":
+`[{nome, via, p: [x, y]}]`, salvati con la stella ☆ accanto a "Vai"; chiamarne uno "Casa" aggiorna `scooter-casa`), `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
-che pesano di più), `scooter-pioggia`, `scooter-voce`.
+che pesano di più), `scooter-voce`.
 
 Tempi imparati: in navigazione vera `recPoint()` registra (ora, metri fatti) quando sei sul percorso con
 precisione ≤ 30 m; `recFlush()` (a fine viaggio e prima di ogni ricalcolo) calcola il tempo di ogni tratto,
