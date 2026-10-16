@@ -34,7 +34,8 @@ Nessun framework, nessuna compilazione, nessuna dipendenza: GitHub Pages serve i
 
 Dentro `index.html`, in ordine:
 
-1. **CSS** (righe ~16–178) con tema chiaro/scuro.
+1. **CSS** con tema chiaro/scuro: scuro se lo è l'iPhone, e comunque da 20 min dopo il tramonto a 10 min
+   prima dell'alba (`nightTheme()`, alba e tramonto calcolati per Milano).
 2. **Motore percorsi** (`ScooterRouter`, il blocco che inizia con `// Motore di calcolo percorsi`, riga ~233):
    funziona sia nel browser sia in Node (`module.exports`); gli strumenti in `tools/` lo leggono da qui.
 3. **Interfaccia** (`(async function () {`, riga ~675–1556): carica `data/strade.json`, ricerca indirizzi,

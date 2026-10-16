@@ -810,6 +810,26 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 <script>
 (async function () {
   'use strict';
+  // ---------- Tema scuro la sera ----------
+  // Dal tramonto all'alba (calcolati per Milano, giorno per giorno) l'app passa da sola al tema scuro,
+  // per non abbagliare in guida; di giorno segue l'impostazione dell'iPhone.
+  function sunTimes(date) { // alba e tramonto a Milano, in minuti dalla mezzanotte (ora del telefono)
+    const lat = 45.4655 * Math.PI / 180, lon = 9.1865;
+    const n = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 864e5), g = 2 * Math.PI / 365 * (n - 1);
+    const eqt = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+    const decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+    const ha = Math.acos(Math.cos(90.833 * Math.PI / 180) / (Math.cos(lat) * Math.cos(decl)) - Math.tan(lat) * Math.tan(decl)) * 180 / Math.PI;
+    const noon = 720 - 4 * lon - eqt - date.getTimezoneOffset();
+    return [noon - 4 * ha, noon + 4 * ha];
+  }
+  function nightTheme() {
+    const d = new Date(), m = d.getHours() * 60 + d.getMinutes(), [rise, set] = sunTimes(d), root = document.documentElement;
+    if (m < rise - 10 || m > set + 20) { if (root.dataset.theme !== 'dark') root.dataset.theme = 'dark'; } // da 20 min dopo il tramonto a 10 min prima dell'alba
+    else if (root.dataset.theme === 'dark') delete root.dataset.theme;
+    const meta = document.querySelector('meta[name="theme-color"]'); // colore della barra in alto dell'iPhone
+    if (meta) meta.content = root.dataset.theme === 'dark' ? '#151b1d' : '#e9ece6';
+  }
+  nightTheme(); setInterval(nightTheme, 60000);
   // La mappa sta in un file a parte (data/strade.json), aggiornato da tools/build_data.py
   const cardEl = document.getElementById('card');
   cardEl.innerHTML = '<div class="pane"><h3>Carico la mappa…</h3></div>';
