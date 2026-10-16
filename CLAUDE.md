@@ -96,6 +96,14 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
   (solo i tratti del percorso, non tutta la via); dalla schermata correzioni: oggi, 1 settimana, 1 mese.
 - Il percorso "auto" è calcolato solo per confronto.
 
+### Introduzione (prima apertura)
+
+Overlay `#intro` (HTML, stile e script propri, prima dello script dell'interfaccia: si vede subito, mentre la mappa si
+carica). Due schermate su sfondo "aurora": benvenuto con icona e tre funzioni, poi "Prima di partire" (posizione,
+schermo acceso, cartelli, "Aggiungi alla Home" solo se aperta da Safari). Si vede finché manca `scooter-intro`;
+finché è aperta (`window.__intro`) l'app non chiede la posizione: la chiede "Consenti posizione e inizia"
+(evento `scootly-intro`). Si rivede da Correggi → Altro → "Rivedi l'introduzione" (`window.showIntro()`).
+
 ### Disegno della mappa
 
 `draw()` calcola una volta per immagine il rettangolo visibile (`VB`), poi: sfondo (`drawBg()`, con una
@@ -133,7 +141,7 @@ In guida ~16 ms per immagine nel browser di prova.
 `[{nome, via, p: [x, y]}]`, salvati con la stella ☆ accanto a "Vai"; chiamarne uno "Casa" aggiorna `scooter-casa`), `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
-che pesano di più), `scooter-voce`, `scooter-tragitti` (tempi veri porta a porta: `[{a, b, s, d, h}]`, partenza
+che pesano di più), `scooter-voce`, `scooter-intro` (introduzione già vista), `scooter-tragitti` (tempi veri porta a porta: `[{a, b, s, d, h}]`, partenza
 e arrivo in metri, secondi; per lo stesso tragitto, partenza e arrivo entro 300 m, la scheda mostra la media, o la
 mediana da 3 viaggi, e l'ora di arrivo in guida segue quei tempi), `scooter-in-corso` (viaggio in guida, salvato ogni
 8 s: se l'app viene chiusa entro 400 m dall'arrivo, alla riapertura il viaggio conta con l'ora dell'ultima posizione).

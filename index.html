@@ -200,6 +200,66 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 .closepick { position: absolute; left: 16px; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 8; max-width: 520px; margin: 0 auto; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .closepick h4 { margin: 0; font: 700 18px/1.2 var(--font-cond); }
 .closepick .btn { width: 100%; font-size: 16px; padding: 13px 10px; }
+/* ===== Introduzione (prima apertura): sfondo "aurora", icona in 3D, due schermate ===== */
+.intro { position: fixed; inset: 0; z-index: 60; overflow: hidden; background: #0e0b14; color: #fff; font-family: var(--font-body); transition: opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+.intro.out { opacity: 0; transform: scale(1.08); pointer-events: none; }
+.in-blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .75; }
+.in-b1 { width: 340px; height: 340px; background: #ff6a1a; left: -80px; top: -60px; animation: inF1 8s ease-in-out infinite alternate; }
+.in-b2 { width: 300px; height: 300px; background: #ff2d75; right: -90px; top: 120px; animation: inF2 9s ease-in-out infinite alternate; }
+.in-b3 { width: 320px; height: 320px; background: #6b3cff; left: 20px; bottom: -120px; animation: inF1 10s ease-in-out infinite alternate-reverse; }
+@keyframes inF1 { to { transform: translate(60px, 40px) scale(1.15); } }
+@keyframes inF2 { to { transform: translate(-50px, 60px) scale(.9); } }
+.in-glass { position: absolute; inset: 0; background: rgba(14,11,20,.35); }
+.in-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: calc(56px + env(safe-area-inset-top)) 26px calc(140px + env(safe-area-inset-bottom)); box-sizing: border-box; overflow-y: auto; transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
+.in-page.next { opacity: 0; transform: translateX(40px); pointer-events: none; }
+.in-page.prev { opacity: 0; transform: translateX(-40px); pointer-events: none; }
+.in-icon { width: 112px; height: 112px; flex: none; border-radius: 27px; background: linear-gradient(145deg,#ff8a3d,#e2621b 55%,#b9430b); display: grid; place-items: center; color: #fbfbf8; position: relative; overflow: hidden;
+  box-shadow: 0 30px 60px rgba(255,90,20,.45), inset 0 1px 0 rgba(255,255,255,.4); transform: perspective(600px) rotateX(25deg) scale(.6); opacity: 0; }
+.in-icon svg { width: 74px; height: 74px; }
+.in-icon::after { content: ""; position: absolute; inset: -40%; background: linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%); transform: translateX(-100%); }
+.in-page.on .in-icon { animation: inIcon 1s .2s cubic-bezier(.2,1.4,.3,1) forwards; }
+.in-page.on .in-icon::after { animation: inShine 1.2s 1.1s ease-in-out forwards; }
+@keyframes inIcon { to { transform: none; opacity: 1; } }
+@keyframes inShine { to { transform: translateX(100%); } }
+@keyframes inUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.intro h1 { font: 800 46px/1 var(--font-body); letter-spacing: -.02em; margin: 24px 0 6px; opacity: 0; }
+.intro h2 { font: 800 36px/1.05 var(--font-body); letter-spacing: -.02em; margin: 6px 0 8px; text-align: center; opacity: 0; }
+.in-sub { font: 500 18px/1.35 var(--font-body); color: rgba(255,255,255,.72); margin: 0 0 28px; text-align: center; opacity: 0; }
+.in-page.on h1, .in-page.on h2 { animation: inUp .6s .9s forwards; }
+.in-page.on .in-sub { animation: inUp .6s 1.05s forwards; }
+.in-page[data-p="1"].on h2 { animation-delay: .1s; } .in-page[data-p="1"].on .in-sub { animation-delay: .2s; }
+.in-feat { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 20px; }
+.in-f { display: flex; gap: 16px; align-items: flex-start; opacity: 0; }
+.in-page.on .in-f { animation: inUp .6s forwards; }
+.in-page.on .in-f:nth-child(1) { animation-delay: 1.35s; } .in-page.on .in-f:nth-child(2) { animation-delay: 1.55s; } .in-page.on .in-f:nth-child(3) { animation-delay: 1.75s; } .in-page.on .in-f:nth-child(4) { animation-delay: 1.95s; }
+.in-page[data-p="1"].on .in-f:nth-child(1) { animation-delay: .35s; } .in-page[data-p="1"].on .in-f:nth-child(2) { animation-delay: .5s; } .in-page[data-p="1"].on .in-f:nth-child(3) { animation-delay: .65s; } .in-page[data-p="1"].on .in-f:nth-child(4) { animation-delay: .8s; }
+.in-ic { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); }
+.in-f b { display: block; font: 700 17px var(--font-body); margin-bottom: 2px; }
+.in-f span { font: 400 15px/1.35 var(--font-body); color: rgba(255,255,255,.72); }
+.in-bar { position: absolute; left: 26px; right: 26px; bottom: calc(26px + env(safe-area-inset-bottom)); max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.in-btn { width: 100%; border: 0; border-radius: 16px; padding: 18px; font: 700 19px var(--font-body); background: #fff; color: #16101e; cursor: pointer; opacity: 0; }
+.in-skip { border: 0; background: none; color: rgba(255,255,255,.7); font: 600 15px var(--font-body); padding: 10px; cursor: pointer; opacity: 0; }
+.in-page.on .in-btn { animation: inUp .6s 2.1s forwards; } .in-page.on .in-skip { animation: inUp .6s 2.2s forwards; }
+.in-page[data-p="1"].on .in-btn { animation-delay: 1s; } .in-page[data-p="1"].on .in-skip { animation-delay: 1.1s; }
+.in-pin { width: 64px; height: 64px; flex: none; border-radius: 22px; display: grid; place-items: center; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); opacity: 0; transform: scale(.6); }
+.in-page[data-p="1"] { padding-top: calc(34px + env(safe-area-inset-top)); }
+.in-page[data-p="1"] .in-feat { gap: 14px; }
+.in-page[data-p="1"] .in-sub { margin-bottom: 18px; }
+.in-page[data-p="1"] .in-f span { font-size: 14px; }
+.in-page[data-p="1"].on .in-pin { animation: inIcon .7s .05s cubic-bezier(.2,1.4,.3,1) forwards; }
+/* schermi bassi (iPhone SE): tutto piu' compatto, cosi' niente finisce sotto i pulsanti */
+@media (max-height: 700px) {
+  .in-page { padding-top: calc(26px + env(safe-area-inset-top)); padding-bottom: calc(128px + env(safe-area-inset-bottom)); }
+  .in-icon { width: 84px; height: 84px; border-radius: 21px; } .in-icon svg { width: 56px; height: 56px; }
+  .intro h1 { font-size: 38px; margin-top: 16px; } .intro h2 { font-size: 30px; }
+  .in-sub { font-size: 16px; margin-bottom: 18px; }
+  .in-feat { gap: 14px; } .in-f span { font-size: 14px; }
+  .in-page[data-p="1"] { padding-top: calc(22px + env(safe-area-inset-top)); } .in-page[data-p="1"] .in-pin { display: none; }
+  .in-page[data-p="1"] .in-sub { display: none; } .in-page[data-p="1"] h2 { margin-bottom: 16px; }
+  .in-ic { width: 40px; height: 40px; border-radius: 12px; }
+  .in-bar { bottom: calc(14px + env(safe-area-inset-bottom)); gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) { .intro *, .intro *::after { animation-duration: .01s !important; animation-delay: 0s !important; } .in-page { transition: none; } }
 @media (prefers-reduced-motion: no-preference) { .card, .suggest { animation: rise .18s ease-out; } @keyframes rise { from { transform: translateY(6px); opacity: .6; } to { transform: none; opacity: 1; } } }
 </style>
 </head>
@@ -806,6 +866,60 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ScooterRouter = api;
 })(this);
 
+</script>
+<div class="intro" id="intro" hidden>
+  <div class="in-blob in-b1"></div><div class="in-blob in-b2"></div><div class="in-blob in-b3"></div><div class="in-glass"></div>
+  <section class="in-page on" data-p="0">
+    <div class="in-icon"><svg viewBox="0 0 64 64"><g fill="currentColor"><circle cx="16" cy="46" r="8"/><circle cx="49" cy="46" r="8"/><path d="M7 44c0-10 7-16 17-16h5l4 11h10l3-5h4l-3 11H9z"/><rect x="13" y="21" width="17" height="6" rx="3"/><path d="M42 12h10a2 2 0 0 1 0 4h-3l4.5 25h-4.5l-4.5-25h-2.5a2 2 0 0 1 0-4z"/></g></svg></div>
+    <h1>Scootly</h1>
+    <p class="in-sub">Milano in scooter, senza giri inutili.</p>
+    <div class="in-feat">
+      <div class="in-f"><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff9a5a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19V9a3 3 0 0 1 3-3h9m0 0-3-3m3 3-3 3"/></svg></div><div><b>Percorsi da scooter</b><span>Sensi unici, ZTL e strade aperte alle moto, secondo il Comune.</span></div></div>
+      <div class="in-f"><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="#ffd166"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><div><b>Casa e Lavoro a un tocco</b><span>Cerca un posto e salvalo con la stella.</span></div></div>
+      <div class="in-f"><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7ee0a8" stroke-width="2.2" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></div><div><b>Guida con la voce</b><span>Indicazioni come un navigatore, anche in cuffia.</span></div></div>
+    </div>
+    <div class="in-bar"><button class="in-btn" data-in="next">Continua</button><button class="in-skip" data-in="done">Salta</button></div>
+  </section>
+  <section class="in-page next" data-p="1">
+    <div class="in-pin"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+    <h2>Prima di partire</h2>
+    <p class="in-sub">Poche cose da sapere.</p>
+    <div class="in-feat">
+      <div class="in-f"><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7cc4ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><div><b>La tua posizione</b><span>Serve per partire da dove sei. Resta sul telefono, non va a nessuno.</span></div></div>
+      <div class="in-f"><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffd166" stroke-width="2.2" stroke-linecap="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg></div><div><b>Schermo acceso in guida</b><span>A schermo bloccato l'app non può parlare: tienilo acceso sul supporto.</span></div></div>
+      <div class="in-f"><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff9a5a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4M12 17h.01"/></svg></div><div><b>Valgono sempre i cartelli</b><span>Scootly è un aiuto: in strada comandano i segnali.</span></div></div>
+      <div class="in-f" id="in-home" hidden><div class="in-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a7ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0-4 4m4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg></div><div><b>Mettila sulla Home</b><span>Condividi → "Aggiungi alla schermata Home".</span></div></div>
+    </div>
+    <div class="in-bar"><button class="in-btn" data-in="done">Consenti posizione e inizia</button><button class="in-skip" data-in="later">Più tardi</button></div>
+  </section>
+</div>
+<script>
+// Introduzione: si vede alla prima apertura ('scooter-intro'), prima ancora che la mappa sia caricata.
+// Finche' e' aperta l'app non chiede la posizione: la chiede il pulsante "Consenti posizione e inizia".
+(function () {
+  const el = document.getElementById('intro');
+  let seen = false; try { seen = !!localStorage.getItem('scooter-intro'); } catch (e) {}
+  // nel browser (non dalla Home) si suggerisce di aggiungerla alla schermata Home
+  const standalone = navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  if (!standalone) document.getElementById('in-home').hidden = false;
+  const pages = [...el.querySelectorAll('.in-page')];
+  function go(n) { pages.forEach((p, i) => { p.classList.toggle('on', i === n); p.classList.toggle('prev', i < n); p.classList.toggle('next', i > n); }); el.dataset.p = n; }
+  function close(locate) {
+    try { localStorage.setItem('scooter-intro', '1'); } catch (e) {}
+    window.__intro = false; el.classList.add('out');
+    setTimeout(() => { el.hidden = true; el.classList.remove('out'); go(0); }, 600);
+    window.dispatchEvent(new CustomEvent('scootly-intro', { detail: { locate } }));
+  }
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-in]'); if (!b) return;
+    if (b.dataset.in === 'next') go(1); else close(b.dataset.in === 'done');
+  });
+  let x0 = null; // scorrere col dito tra le due schermate
+  el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (dx < -50) go(1); else if (dx > 50) go(0); });
+  window.showIntro = () => { window.__intro = true; go(0); el.hidden = false; };
+  if (!seen) window.showIntro();
+})();
 </script>
 <script>
 (async function () {
@@ -1632,6 +1746,7 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
           <h4>Tempi imparati</h4>
           <p>${TEMPI.viaggi ? `Le stime usano i tuoi tempi veri: ${TEMPI.viaggi} ${TEMPI.viaggi === 1 ? 'viaggio' : 'viaggi'}, ${Object.keys(TEMPI.w).length} vie misurate.` : 'Ancora nessun viaggio: dopo il primo viaggio con "Vai" le stime useranno i tuoi tempi veri.'}</p>
           ${TEMPI.viaggi ? '<button class="btn" id="tempi-reset">Azzera i tempi imparati</button>' : ''}
+          <button class="btn" id="intro-again">Rivedi l'introduzione</button>
           <h4>Copia di sicurezza</h4>
           <p>Salva in un codice le tue correzioni, Casa e gli altri preferiti, le ultime destinazioni e i tempi imparati. Incollalo in una Nota (o mandalo a Claude): se l'app si cancella, lo rimetti con "Ripristina".</p>
           <div class="row"><button class="btn" id="bk-copy">Copia codice</button><button class="btn" id="bk-restore">Ripristina</button></div>
@@ -1640,6 +1755,7 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
         card.querySelector('#exitfix').onclick = () => fixBtn.click();
         card.querySelector('#more').onclick = () => { state.more = !state.more; render(); };
         card.querySelector('#bk-copy').onclick = backupCopy;
+        card.querySelector('#intro-again').onclick = () => { fixBtn.click(); window.showIntro(); };
         card.querySelectorAll('[data-delfav]').forEach(b => b.onclick = () => {
           const f = FAV[+b.dataset.delfav]; if (!f || !confirm(`Togliere "${f.label}" dai preferiti?`)) return;
           if (f.id === 'casa') { CASA = null; try { localStorage.removeItem('scooter-casa'); } catch (e) {} FAV = favList(); buildChips(); }
@@ -2381,8 +2497,10 @@ ${steps}
       setGpsFrom('from', fix, first); first = false;
     });
   }
-  autoLocate();
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoLocate(); });
+  // alla prima apertura la posizione si chiede solo alla fine dell'introduzione
+  if (!window.__intro) autoLocate();
+  window.addEventListener('scootly-intro', ev => { if (ev.detail && ev.detail.locate) autoLocate(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !window.__intro) autoLocate(); });
   if (document.fonts) document.fonts.ready.then(() => { place(); redraw(); });
 })();
 </script>

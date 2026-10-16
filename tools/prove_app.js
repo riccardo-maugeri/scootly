@@ -42,6 +42,8 @@ function check(ok, msg) { console.log((ok ? '  ok   ' : '  NO   ') + msg); if (!
       Object.defineProperty(window, 'speechSynthesis', { value: { speak: u => window.__said.push(u.text), cancel() {}, getVoices: () => [], addEventListener() {} } });
       window.SpeechSynthesisUtterance = function (t) { this.text = t; };
     });
+    // l'introduzione della prima apertura si salta (ha la sua prova, sotto), tranne quando si prova proprio quella
+    if (!opts.intro) await ctx.addInitScript(() => { try { localStorage.setItem('scooter-intro', '1'); } catch (e) {} });
     if (opts.hour) await ctx.addInitScript(h => { const D = Date; const off = new D(new D().toISOString().slice(0, 10) + 'T' + h) - new D(); window.Date = class extends D { constructor(...a) { super(...(a.length ? a : [D.now() + off])); } static now() { return D.now() + off; } }; }, opts.hour);
     if (opts.storage) await ctx.addInitScript(st => { if (!sessionStorage.getItem('__init')) { for (const k in st) localStorage.setItem(k, st[k]); sessionStorage.setItem('__init', '1'); } }, opts.storage);
     const page = await ctx.newPage(); page.errors = [];
@@ -58,6 +60,24 @@ function check(ok, msg) { console.log((ok ? '  ok   ' : '  NO   ') + msg); if (!
     const { ctx, page } = await phone();
     check(await page.$eval('#card', c => c.hidden), 'all\'avvio si vede solo la mappa (nessun riquadro in basso)');
     check(!(await page.$('#rainmode')) && !(await page.$('#simgo')), 'niente pulsanti pioggia e prova simulata');
+    check(page.errors.length === 0, `nessun errore (${page.errors.join(' | ')})`);
+    await ctx.close();
+  }
+
+  console.log('1b. Introduzione alla prima apertura');
+  {
+    const { ctx, page } = await phone({ intro: true });
+    check(await page.$eval('#intro', e => !e.hidden), "alla prima apertura c'è l'introduzione");
+    check(await page.evaluate(() => window.__intro === true), "durante l'introduzione la posizione non viene chiesta");
+    await page.waitForTimeout(2500); await page.click('.in-page.on [data-in="next"]'); await page.waitForTimeout(1500);
+    check(/Prima di partire/.test(await page.textContent('.in-page.on')), 'con "Continua" si passa a "Prima di partire"');
+    await page.click('.in-page.on [data-in="done"]'); await page.waitForTimeout(1500);
+    check(await page.$eval('#intro', e => e.hidden), '"Consenti posizione e inizia" chiude l\'introduzione');
+    check(await page.evaluate(() => localStorage.getItem('scooter-intro')) === '1', "l'introduzione non si rivede alla prossima apertura");
+    await page.waitForTimeout(2500);
+    check(/posizione/i.test(await page.inputValue('#q-from')), 'dopo l\'introduzione la partenza è la posizione GPS');
+    await page.reload(); await page.ready();
+    check(await page.$eval('#intro', e => e.hidden), 'riaprendo l\'app non ricompare');
     check(page.errors.length === 0, `nessun errore (${page.errors.join(' | ')})`);
     await ctx.close();
   }
