@@ -2408,7 +2408,7 @@ ${steps}
         // letture imprecise: si ignorano finche' ne arrivano di buone; dopo 10 s senza, si usano lo stesso
         if (acc > 65 && now - nav.goodT < 10000) return;
         if (acc > 200) return;
-        if (acc <= 65) nav.goodT = now;
+        if (acc <= 65) { nav.goodT = now; nav.lostWarned = false; }
         const weak = acc > 65;
         if (weak && !nav.weak) toast('Segnale GPS debole: la posizione è meno precisa');
         nav.weak = weak;
@@ -2418,7 +2418,12 @@ ${steps}
         const moving = c.speed != null && !isNaN(c.speed) && c.speed > 1.5;
         const h = moving && c.heading != null && !isNaN(c.heading) ? (90 - c.heading) * Math.PI / 180 : null;
         update(xy, { acc, heading: h, speed: c.speed != null && !isNaN(c.speed) ? c.speed : null });
-      }, () => { toast('Non riesco a leggere la posizione: controlla i permessi di Safari'); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+      }, err => {
+        // permessi negati: va detto; segnale assente o lento (galleria, fermo al semaforo): la guida aspetta
+        // in silenzio che torni, e lo dice una volta sola se manca da piu' di 15 secondi
+        if (err && err.code === 1) toast('Non riesco a leggere la posizione: controlla i permessi di Safari');
+        else if (!nav.lostWarned && Date.now() - nav.goodT > 15000) { nav.lostWarned = true; toast('Segnale GPS assente: aspetto che torni'); }
+      }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
     }
     renderNav(nextTurn(), nav.route.length); startAnim();
   }
