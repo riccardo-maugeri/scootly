@@ -127,7 +127,10 @@ In guida ~16 ms per immagine nel browser di prova.
 `[{nome, via, p: [x, y]}]`, salvati con la stella ☆ accanto a "Vai"; chiamarne uno "Casa" aggiorna `scooter-casa`), `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
-che pesano di più), `scooter-voce`.
+che pesano di più), `scooter-voce`, `scooter-tragitti` (tempi veri porta a porta: `[{a, b, s, d, h}]`, partenza
+e arrivo in metri, secondi; per lo stesso tragitto, partenza e arrivo entro 300 m, la scheda mostra la media, o la
+mediana da 3 viaggi, e l'ora di arrivo in guida segue quei tempi), `scooter-in-corso` (viaggio in guida, salvato ogni
+8 s: se l'app viene chiusa entro 400 m dall'arrivo, alla riapertura il viaggio conta con l'ora dell'ultima posizione).
 
 Tempi imparati: in navigazione vera `recPoint()` registra (ora, metri fatti) quando sei sul percorso con
 precisione ≤ 30 m; `recFlush()` (a fine viaggio e prima di ogni ricalcolo) calcola il tempo di ogni tratto,
