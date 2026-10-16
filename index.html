@@ -166,8 +166,13 @@ body {
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-soft); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; }
-.go { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--panel-line); }
+.go { display: grid; grid-template-columns: 2fr 1fr 48px; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--panel-line); }
 .go .btn.primary { font-size: 16px; padding: 12px 10px; }
+.btn.star { font-size: 20px; padding: 8px 0; line-height: 1; color: var(--ink-soft); }
+.btn.star.on { color: #e0a100; }
+.favrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
+.favrow small { color: var(--ink-soft); font-weight: 400; }
+.favrow .btn { padding: 6px 12px; flex: none; }
 [hidden] { display: none !important; }
 body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banner { display: none; }
 .navtop { position: absolute; left: 16px; right: 16px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 7; background: var(--ink); color: var(--panel); border-radius: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; padding: 12px 14px; max-width: 520px; margin: 0 auto; }
@@ -813,8 +818,12 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   let CASA = null;
   try { const c = JSON.parse(localStorage.getItem('scooter-casa') || 'null'); if (c && c.length === 2) CASA = c; } catch (e) {}
   const casaFav = () => CASA ? { id: 'casa', label: 'Casa', full: 'Casa', p: CASA } : null;
-  const BASE_FAV = []; // niente destinazioni pre-impostate: la destinazione la scrivi tu
-  let FAV = CASA ? [casaFav(), ...BASE_FAV] : BASE_FAV.slice();
+  // Altri posti con un nome scelto da te (es. "Lavoro"), salvati con la stella: solo su questo telefono.
+  // 'scooter-preferiti' = [{ nome, via, p: [x, y] }]
+  let PREF = [];
+  try { const a = JSON.parse(localStorage.getItem('scooter-preferiti') || '[]'); if (Array.isArray(a)) PREF = a.filter(f => f && f.nome && f.p && f.p.length === 2); } catch (e) {}
+  const favList = () => [...(CASA ? [casaFav()] : []), ...PREF.map(f => ({ id: 'pref', label: f.nome, full: f.via || f.nome, p: f.p }))];
+  let FAV = favList();
 
   // ---------- Stato ----------
   const state = {
@@ -1560,17 +1569,24 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
           <div class="row"><button class="btn" id="exitfix">Fine correzioni</button><button class="btn" id="more" aria-expanded="${!!state.more}">${state.more ? 'Meno' : 'Altro…'}</button></div>
           <div class="more" ${state.more ? '' : 'hidden'}>
           ${MAP_DATE ? `<p class="sub2">Mappa OpenStreetMap del ${MAP_DATE}, con le regole del Comune di Milano${META.civici ? ` e i numeri civici ufficiali del ${fmtDate(META.civici)}` : ''}.</p>` : ''}
+          ${FAV.length ? `<h4>Preferiti</h4><p>Per aggiungerne uno: cerca l'arrivo e tocca la stella ☆ accanto a "Vai".</p><div class="favlist">${FAV.map((f, i) => `<div class="favrow"><span><b>${esc(f.label)}</b>${f.id === 'pref' ? ` <small>${esc(f.full)}</small>` : ''}</span><button class="btn" data-delfav="${i}">Togli</button></div>`).join('')}</div>` : ''}
           <h4>Tempi imparati</h4>
           <p>${TEMPI.viaggi ? `Le stime usano i tuoi tempi veri: ${TEMPI.viaggi} ${TEMPI.viaggi === 1 ? 'viaggio' : 'viaggi'}, ${Object.keys(TEMPI.w).length} vie misurate.` : 'Ancora nessun viaggio: dopo il primo viaggio con "Vai" le stime useranno i tuoi tempi veri.'}</p>
           ${TEMPI.viaggi ? '<button class="btn" id="tempi-reset">Azzera i tempi imparati</button>' : ''}
           <h4>Copia di sicurezza</h4>
-          <p>Salva in un codice le tue correzioni, Casa, le ultime destinazioni e i tempi imparati. Incollalo in una Nota (o mandalo a Claude): se l'app si cancella, lo rimetti con "Ripristina".</p>
+          <p>Salva in un codice le tue correzioni, Casa e gli altri preferiti, le ultime destinazioni e i tempi imparati. Incollalo in una Nota (o mandalo a Claude): se l'app si cancella, lo rimetti con "Ripristina".</p>
           <div class="row"><button class="btn" id="bk-copy">Copia codice</button><button class="btn" id="bk-restore">Ripristina</button></div>
           <div class="backup" id="bk-box" hidden></div>
           </div></div>`;
         card.querySelector('#exitfix').onclick = () => fixBtn.click();
         card.querySelector('#more').onclick = () => { state.more = !state.more; render(); };
         card.querySelector('#bk-copy').onclick = backupCopy;
+        card.querySelectorAll('[data-delfav]').forEach(b => b.onclick = () => {
+          const f = FAV[+b.dataset.delfav]; if (!f || !confirm(`Togliere "${f.label}" dai preferiti?`)) return;
+          if (f.id === 'casa') { CASA = null; try { localStorage.removeItem('scooter-casa'); } catch (e) {} FAV = favList(); buildChips(); }
+          else { PREF = PREF.filter(x => x.nome !== f.label); savePref(); }
+          render();
+        });
         const tr = card.querySelector('#tempi-reset');
         if (tr) tr.onclick = () => {
           if (!confirm('Vuoi dimenticare i tempi imparati dai tuoi viaggi?')) return;
@@ -1608,7 +1624,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       card.querySelector('#setcasa').onclick = () => {
         CASA = [Math.round(state.pick[0]), Math.round(state.pick[1])];
         try { localStorage.setItem('scooter-casa', JSON.stringify(CASA)); } catch (e) {}
-        FAV = [casaFav(), ...BASE_FAV]; buildChips();
+        FAV = favList(); buildChips();
         state.from = { label: 'Casa', p: CASA }; state.pick = null; syncInputs(); compute(true); render();
         toast('Casa salvata su questo telefono');
       };
@@ -1648,14 +1664,47 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       <div class="gain"><span>${gainTxt}</span><span class="more">${state.expanded ? 'Chiudi' : 'Strade'}</span></div>
       ${state.from.gps && (state.from.coarse || state.from.acc > 40) ? `<div class="accbar">${accText(state.from)}</div>` : ''}
 ${steps}
-      <div class="go"><button class="btn primary" id="go">Vai</button><button class="btn" id="simgo">Prova simulata</button></div>`;
+      <div class="go"><button class="btn primary" id="go">Vai</button><button class="btn" id="simgo">Prova simulata</button>${favBtn()}</div>`;
     card.querySelector('#go').onclick = () => startNav(false);
+    card.querySelector('#favbtn').onclick = toggleFav;
     card.querySelector('#simgo').onclick = () => startNav(true);
     card.querySelector('#toggle').onclick = () => { state.expanded = !state.expanded; render(); fitRoute(); };
     card.querySelector('.gain').onclick = () => { state.expanded = !state.expanded; render(); fitRoute(); };
   }
 
-  function backupData() { return JSON.stringify({ app: 'scooter-milano', v: 1, casa: CASA, corr: state.corr, recenti: RECENT, viaggi: TRIPS, tempi: TEMPI }); }
+  // ---------- Stella: salva l'arrivo con un nome (es. "Lavoro") ----------
+  const near30 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]) < 30;
+  const favAt = p => FAV.find(f => near30(f.p, p));
+  function favBtn() {
+    const f = state.to && !state.to.gps && favAt(state.to.p);
+    return f ? `<button class="btn star on" id="favbtn" aria-label="Salvato come ${esc(f.label)}: tocca per toglierlo">★</button>`
+      : '<button class="btn star" id="favbtn" aria-label="Salva questo arrivo con un nome">☆</button>';
+  }
+  function savePref() { try { localStorage.setItem('scooter-preferiti', JSON.stringify(PREF)); } catch (e) {} FAV = favList(); buildChips(); }
+  function toggleFav() {
+    const t = state.to; if (!t || !t.p) return;
+    const f = favAt(t.p);
+    if (f) {
+      if (!confirm(`Togliere "${f.label}" dai preferiti?`)) return;
+      if (f.id === 'casa') { CASA = null; try { localStorage.removeItem('scooter-casa'); } catch (e) {} FAV = favList(); buildChips(); }
+      else { PREF = PREF.filter(x => !near30(x.p, t.p)); savePref(); }
+      toast(`"${f.label}" tolto dai preferiti`); render(); return;
+    }
+    let nome = prompt('Che nome gli dai? (es. Lavoro, Palestra)', PREF.some(x => x.nome.toLowerCase() === 'lavoro') ? '' : 'Lavoro');
+    nome = (nome || '').trim().slice(0, 24); if (!nome) return;
+    const p = [Math.round(t.p[0]), Math.round(t.p[1])];
+    if (nome.toLowerCase() === 'casa') {
+      CASA = p; try { localStorage.setItem('scooter-casa', JSON.stringify(CASA)); } catch (e) {}
+      FAV = favList(); buildChips();
+    } else {
+      // stesso nome: si sostituisce il posto vecchio (es. hai cambiato ufficio)
+      PREF = [...PREF.filter(x => x.nome.toLowerCase() !== nome.toLowerCase()), { nome, via: t.label, p }];
+      savePref();
+    }
+    toast(`Salvato: "${nome}" ora è in alto, accanto a Casa`); render();
+  }
+
+  function backupData() { return JSON.stringify({ app: 'scooter-milano', v: 1, casa: CASA, preferiti: PREF, corr: state.corr, recenti: RECENT, viaggi: TRIPS, tempi: TEMPI }); }
   async function backupCopy() {
     const txt = backupData(), box = document.getElementById('bk-box');
     try { await navigator.clipboard.writeText(txt); toast('Codice copiato: incollalo in una Nota'); }
@@ -1670,7 +1719,8 @@ ${steps}
     box.querySelector('#bk-go').onclick = () => {
       let d; try { d = JSON.parse(box.querySelector('#bk-in').value.trim()); } catch (e) { toast('Codice non valido: incollalo tutto, dalla { alla }'); return; }
       if (!d || d.app !== 'scooter-milano') { toast('Questo non sembra un codice dell\'app'); return; }
-      if (d.casa) { CASA = d.casa; store.set('scooter-casa', CASA); FAV = [casaFav(), ...BASE_FAV]; buildChips(); }
+      if (d.casa) { CASA = d.casa; store.set('scooter-casa', CASA); FAV = favList(); buildChips(); }
+      if (Array.isArray(d.preferiti)) { PREF = d.preferiti.filter(f => f && f.nome && f.p && f.p.length === 2); savePref(); }
       if (d.corr) { state.corr = d.corr; saveLocal(); R.setCorrections(flatCorr()); }
       if (d.recenti) { RECENT = d.recenti; store.set('scooter-recenti', RECENT); }
       if (d.viaggi) { TRIPS = d.viaggi; store.set('scooter-viaggi', TRIPS); }

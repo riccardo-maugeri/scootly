@@ -116,7 +116,8 @@ In guida ~16 ms per immagine nel browser di prova.
 
 ### Dati salvati sul telefono (`localStorage`)
 
-`scooter-corr` (correzioni), `scooter-casa`, `scooter-recenti`, `scooter-viaggi` (vecchio confronto
+`scooter-corr` (correzioni), `scooter-casa`, `scooter-preferiti` (altri posti con un nome, es. "Lavoro":
+`[{nome, via, p: [x, y]}]`, salvati con la stella ☆ accanto a "Vai"; chiamarne uno "Casa" aggiorna `scooter-casa`), `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
 che pesano di più), `scooter-voce`.
