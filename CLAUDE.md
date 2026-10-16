@@ -87,7 +87,10 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
 - `snap(x, y, mode, heading)` / `route(from, to, mode, { heading })`: con la direzione di marcia la partenza
   va sulla strada e nel verso coerenti (usato nei ricalcoli in navigazione).
 - Modalità pioggia: pavé ×2,5 e binari del tram ×3 nel costo (non nel tempo mostrato).
-- Correzioni dell'utente per osmId: `vietata`, `aperta`, `senso`, `senso_inv`, `evita` (×3), `preferita` (×0,7).
+- Correzioni dell'utente per osmId: `vietata`, `aperta`, `senso`, `senso_inv`, `evita` (×3), `preferita` (×0,7),
+  `chiusa` (per lavori, con `fino`: data ISO; scaduta = ignorata e tolta da `purgeExpired()`). In guida il
+  pulsante "Strada chiusa" propone la via attuale e le prossime entro 400 m e le chiude per 3 giorni
+  (solo i tratti del percorso, non tutta la via); dalla schermata correzioni: oggi, 1 settimana, 1 mese.
 - Il percorso "auto" è calcolato solo per confronto.
 
 ### Disegno della mappa

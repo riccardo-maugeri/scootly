@@ -119,6 +119,11 @@ body {
 /* Scheda in basso */
 .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; padding: 0 16px calc(12px + env(safe-area-inset-bottom, 0px)); pointer-events: none; display: flex; justify-content: center; }
 .card { pointer-events: auto; width: 100%; max-width: 520px; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.more { display: flex; flex-direction: column; gap: 10px; }
+/* schede di testo (correzioni, punto toccato): mai oltre meta' schermo, cosi' la mappa resta toccabile; si scorrono */
+.card .pane { max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+/* schermi bassi (es. iPhone SE): + e - sono un doppione del pizzico con due dita */
+@media (max-height: 620px) { #zin, #zout { display: none; } }
 .card-head { display: flex; align-items: stretch; gap: 0; border: 0; background: transparent; width: 100%; padding: 0; color: inherit; text-align: left; cursor: pointer; }
 .mode { flex: 1; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mode + .mode { border-left: 1px solid var(--panel-line); }
@@ -180,6 +185,9 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
 .navbot .tool { box-shadow: none; }
 .navbot .btn { padding: 12px 16px; }
 .recenter { position: absolute; right: 16px; z-index: 7; }
+.closepick { position: absolute; left: 16px; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 8; max-width: 520px; margin: 0 auto; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.closepick h4 { margin: 0; font: 700 18px/1.2 var(--font-cond); }
+.closepick .btn { width: 100%; font-size: 16px; padding: 13px 10px; }
 @media (prefers-reduced-motion: no-preference) { .card, .suggest { animation: rise .18s ease-out; } @keyframes rise { from { transform: translateY(6px); opacity: .6; } to { transform: none; opacity: 1; } } }
 </style>
 </head>
@@ -219,6 +227,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   <div class="sheet"><div class="card" id="card"></div></div>
   <div class="toast" id="toast" hidden></div>
 
+  <div class="closepick" id="closepick" hidden></div>
   <div class="navtop" id="navtop" hidden>
     <div class="nt-ic" id="nt-ic"></div>
     <div><div class="nt-dist" id="nt-dist"></div><div class="nt-name" id="nt-name"></div></div>
@@ -228,6 +237,9 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   </button>
   <div class="navbot" id="navbot" hidden>
     <div class="nb-info"><b id="nb-min"></b><span id="nb-rest"></span></div>
+    <button class="tool" id="nb-closed" aria-label="Strada chiusa" title="Strada chiusa">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M7 12h10"/></svg>
+    </button>
     <button class="tool" id="nb-voice" aria-label="Voce accesa" title="Voce">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4Z"/><path id="nb-wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path id="nb-mute" d="M16 9l6 6M22 9l-6 6" style="display:none"/></svg>
     </button>
@@ -373,7 +385,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       const wi = this.d.edges[e][2], w = this.d.ways[wi];
       const c = this.corr[w[0]];
       if (mode === 'moto' && c) {
-        if (c === 'vietata') return 0;
+        if (c === 'vietata' || c === 'chiusa') return 0; // 'chiusa' = per lavori, fino a una data (l'app la toglie da sola)
         if (c === 'aperta') return 1;
         if (c === 'senso') return dir === 0 ? 1 : 0;
         if (c === 'senso_inv') return dir === 1 ? 1 : 0;
@@ -828,7 +840,16 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   state.corr = loadLocal();
   if (!Object.keys(state.corr).length && Object.keys(BAKED).length) { state.corr = BAKED; saveLocal(); }
   R.setCorrections(flatCorr());
-  function flatCorr() { const o = {}; for (const k in state.corr) o[k] = state.corr[k].tipo; return o; }
+  // chiusure per lavori scadute: non contano piu' (e si tolgono dalla memoria)
+  // (dichiarata come function, non const: viene usata all'avvio da flatCorr() prima di questa riga)
+  function expired(c) { return !!(c && c.tipo === 'chiusa' && c.fino && new Date(c.fino) < new Date()); }
+  function purgeExpired() {
+    let any = false;
+    for (const k in state.corr) if (expired(state.corr[k])) { delete state.corr[k]; any = true; }
+    if (any) saveLocal();
+    return any;
+  }
+  function flatCorr() { const o = {}; for (const k in state.corr) if (!expired(state.corr[k])) o[k] = state.corr[k].tipo; return o; }
   async function getCap(name) {
     for (let i = 0; i < (location.hostname.endsWith('claude.ai') || location.hostname.endsWith('claudeusercontent.com') ? 60 : 5); i++) {
       if (window.claude && typeof window.claude.use === 'function') { try { return await window.claude.use(name); } catch (e) { return null; } }
@@ -895,10 +916,13 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   // altrimenti si usa il vecchio confronto stimato/reale dei viaggi completati
   function timeFactor() { return TEMPI.viaggi ? { f: 1, n: TEMPI.viaggi } : myFactor(); }
 
-  async function setCorrection(osm, tipo, nome) {
-    if (tipo) state.corr[osm] = { tipo, nome, osm, quando: new Date().toISOString() };
+  // extra: campi in piu' (es. { fino } per le chiusure); quiet: niente ricalcolo/messaggio (lo fa chi chiama)
+  async function setCorrection(osm, tipo, nome, extra, quiet) {
+    if (tipo) state.corr[osm] = { tipo, nome, osm, quando: new Date().toISOString(), ...(extra || {}) };
     else delete state.corr[osm];
-    saveLocal(); R.setCorrections(flatCorr()); compute(false); render();
+    saveLocal(); R.setCorrections(flatCorr());
+    if (quiet) { if (db) { try { const ref = db.collection('correzioni').doc('w' + osm); if (tipo) await ref.set(state.corr[osm]); else await ref.delete(); } catch (e) {} } return; }
+    compute(false); render();
     if (db) {
       try {
         const ref = db.collection('correzioni').doc('w' + osm);
@@ -1113,6 +1137,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
 
   // ---------- Calcolo ----------
   function compute(fitAfter) {
+    if (purgeExpired()) R.setCorrections(flatCorr());
     if (!state.from || !state.to) { state.moto = state.car = null; if (fitAfter) fitRoute(); else redraw(); return; }
     R.setTime(new Date()); // regole a orario: valgono quelle di adesso
     state.moto = R.route(state.from.p, state.to.p, 'moto');
@@ -1533,7 +1558,10 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
   function describeAccess(fw, bw) {
     if (fw && bw) return 'doppio senso'; if (fw) return 'senso unico (verso delle frecce)'; if (bw) return 'senso unico (contro le frecce)'; return 'vietata';
   }
-  const CORR_LABEL = { vietata: 'Vietata', aperta: 'Doppio senso', senso: 'Senso unico →', senso_inv: 'Senso unico ←', evita: 'Da evitare', preferita: 'Preferita' };
+  const CORR_LABEL = { vietata: 'Vietata', aperta: 'Doppio senso', senso: 'Senso unico →', senso_inv: 'Senso unico ←', evita: 'Da evitare', preferita: 'Preferita', chiusa: 'Chiusa per lavori' };
+  const corrLabel = c => c.tipo === 'chiusa' && c.fino ? `Chiusa per lavori fino al ${new Date(c.fino).toLocaleDateString('it-IT', { day: 'numeric', month: 'numeric' })}` : CORR_LABEL[c.tipo];
+  // fine della chiusura: oggi a mezzanotte, oppure tra N giorni
+  function closeUntil(days) { const d = new Date(); d.setHours(23, 59, 0, 0); d.setDate(d.getDate() + days); return d.toISOString(); }
 
   function render() {
     // correzione
@@ -1541,8 +1569,10 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       if (state.selWay == null) {
         const n = Object.keys(state.corr).length;
         card.innerHTML = `<div class="pane"><h3>Correggi le strade</h3>
-          <p>Tocca una strada sulla mappa per dire se per te è vietata, a senso unico, da evitare o preferita. Il percorso si ricalcola subito.</p>
+          <p>Tocca una strada sulla mappa: vietata, a senso unico, da evitare, preferita o chiusa per lavori.</p>
           <div class="legend"><span><i style="background:var(--moto-only)"></i>aperta solo alle moto</span><span><i style="background:var(--road-no)"></i>vietata alle moto</span><span><i style="background:var(--fix)"></i>corretta da te (${n})</span></div>
+          <div class="row"><button class="btn" id="exitfix">Fine correzioni</button><button class="btn" id="more" aria-expanded="${!!state.more}">${state.more ? 'Meno' : 'Altro…'}</button></div>
+          <div class="more" ${state.more ? '' : 'hidden'}>
           ${MAP_DATE ? `<p class="sub2">Mappa OpenStreetMap del ${MAP_DATE}, con le regole del Comune di Milano${META.civici ? ` e i numeri civici ufficiali del ${fmtDate(META.civici)}` : ''}.</p>` : ''}
           <h4>Tempi imparati</h4>
           <p>${TEMPI.viaggi ? `Le stime usano i tuoi tempi veri: ${TEMPI.viaggi} ${TEMPI.viaggi === 1 ? 'viaggio' : 'viaggi'}, ${Object.keys(TEMPI.w).length} vie misurate.` : 'Ancora nessun viaggio: dopo il primo viaggio con "Vai" le stime useranno i tuoi tempi veri.'}</p>
@@ -1551,8 +1581,9 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
           <p>Salva in un codice le tue correzioni, Casa, le ultime destinazioni e i tempi imparati. Incollalo in una Nota (o mandalo a Claude): se l'app si cancella, lo rimetti con "Ripristina".</p>
           <div class="row"><button class="btn" id="bk-copy">Copia codice</button><button class="btn" id="bk-restore">Ripristina</button></div>
           <div class="backup" id="bk-box" hidden></div>
-          <button class="btn" id="exitfix">Fine correzioni</button></div>`;
+          </div></div>`;
         card.querySelector('#exitfix').onclick = () => fixBtn.click();
+        card.querySelector('#more').onclick = () => { state.more = !state.more; render(); };
         card.querySelector('#bk-copy').onclick = backupCopy;
         const tr = card.querySelector('#tempi-reset');
         if (tr) tr.onclick = () => {
@@ -1567,12 +1598,16 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
       const nm = NAMES[w[1]] || 'Strada senza nome'; const cur = state.corr[state.selWay];
       const opts = ['vietata', 'aperta', 'senso', 'senso_inv', 'evita', 'preferita'];
       card.innerHTML = `<div class="pane"><h3>${esc(nm)}</h3>
-        <dl class="facts"><dt>Moto, secondo i dati</dt><dd>${describeAccess(w[3], w[4])}</dd><dt>Auto, secondo i dati</dt><dd>${describeAccess(w[5], w[6])}</dd>${cur ? `<dt>La tua correzione</dt><dd style="color:var(--fix)">${CORR_LABEL[cur.tipo]}</dd>` : ''}</dl>
+        <dl class="facts"><dt>Moto, secondo i dati</dt><dd>${describeAccess(w[3], w[4])}</dd><dt>Auto, secondo i dati</dt><dd>${describeAccess(w[5], w[6])}</dd>${cur ? `<dt>La tua correzione</dt><dd style="color:var(--fix)">${esc(corrLabel(cur))}</dd>` : ''}</dl>
         <p>Le frecce bianche sulla mappa mostrano il verso della strada.</p>
         <div class="btns">${opts.map(o => `<button class="btn${cur && cur.tipo === o ? ' sel' : ''}" data-o="${o}">${CORR_LABEL[o]}</button>`).join('')}
         ${cur ? '<button class="btn wide" data-o="">Torna ai dati originali</button>' : ''}</div>
+        <h4>Chiusa per lavori</h4>
+        <p>L'app la evita fino alla data scelta, poi torna a usarla da sola.</p>
+        <div class="btns"><button class="btn${cur && cur.tipo === 'chiusa' ? ' sel' : ''}" data-close="0">Solo oggi</button><button class="btn" data-close="7">Una settimana</button><button class="btn wide" data-close="30">Un mese</button></div>
         <button class="btn" id="closesel">Chiudi</button></div>`;
       card.querySelectorAll('[data-o]').forEach(b => b.onclick = () => setCorrection(state.selWay, b.dataset.o || null, nm));
+      card.querySelectorAll('[data-close]').forEach(b => b.onclick = () => setCorrection(state.selWay, 'chiusa', nm, { fino: closeUntil(+b.dataset.close) }));
       card.querySelector('#closesel').onclick = () => { state.selWay = null; render(); redraw(); };
       return;
     }
@@ -1994,7 +2029,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     const counted = recFlush(); // il pezzo gia' fatto vale comunque per imparare (true = viaggio gia' contato)
     state.moto = r; state.car = null; prepRoute(r); recStart();
     if (nav.rec && counted) nav.rec.counted = true; // stesso viaggio: non contarlo due volte
-    nav.announce = announce ? 'Ricalcolo il percorso. ' : '';
+    nav.announce = typeof announce === 'string' ? announce : announce ? 'Ricalcolo il percorso. ' : '';
     nav.fixT = 0;
     update(p, { acc: nav.acc, heading, speed: nav.speed });
   }
@@ -2079,11 +2114,46 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     if (nav.watch != null && navigator.geolocation) navigator.geolocation.clearWatch(nav.watch); nav.watch = null;
     try { if (nav.wake) nav.wake.release(); } catch (e) {} nav.wake = null;
     try { speechSynthesis.cancel(); } catch (e) {}
-    document.body.classList.remove('navmode'); navtop.hidden = true; navbot.hidden = true; recenter.hidden = true;
+    document.body.classList.remove('navmode'); navtop.hidden = true; navbot.hidden = true; recenter.hidden = true; closePick.hidden = true;
     view.rot = 0; view.oy = 0.5; nav.pos = null; nav.disp = null;
     compute(false); render(); fitRoute();
   }
   document.getElementById('nb-stop').addEventListener('click', stopNav);
+  // ---------- Strada chiusa (in guida) ----------
+  // Mostra la via dove sei e le prossime del percorso (entro 400 m): quella scelta viene evitata per 3 giorni.
+  const closePick = document.getElementById('closepick');
+  function upcomingStreets() {
+    const r = nav.route, D = r.d0s || [], out = [];
+    for (let k = 0; k < D.length && out.length < 3; k++) {
+      const d1 = k + 1 < D.length ? D[k + 1] : r.length;
+      if (d1 <= nav.along || D[k] > nav.along + 400) continue;
+      const w = W[EDGES[r.edges[k] >> 1][2]], nm = NAMES[w[1]] || 'Strada senza nome';
+      const last = out[out.length - 1];
+      if (last && last.nm === nm) { if (!last.osm.includes(w[0])) last.osm.push(w[0]); continue; }
+      out.push({ nm, osm: [w[0]], here: D[k] <= nav.along });
+    }
+    return out;
+  }
+  document.getElementById('nb-closed').addEventListener('click', () => {
+    if (!nav.on || !nav.route) return;
+    const list = upcomingStreets();
+    closePick.innerHTML = '<h4>Quale strada è chiusa?</h4>';
+    list.forEach(st => {
+      const b = document.createElement('button'); b.className = 'btn fix'; b.type = 'button';
+      b.textContent = st.nm + (st.here ? ' (qui)' : '');
+      b.onclick = async () => {
+        closePick.hidden = true;
+        for (const osm of st.osm) await setCorrection(osm, 'chiusa', st.nm, { fino: closeUntil(3) }, true);
+        toast(`Evito ${st.nm} per 3 giorni`);
+        reroute(nav.pos || nav.disp, `Va bene, evito ${st.nm}. `, (nav.speed || 0) > 2 ? nav.heading : undefined);
+      };
+      closePick.appendChild(b);
+    });
+    const c = document.createElement('button'); c.className = 'btn'; c.type = 'button'; c.textContent = 'Annulla';
+    c.onclick = () => { closePick.hidden = true; };
+    closePick.appendChild(c);
+    closePick.hidden = false;
+  });
   recenter.addEventListener('click', () => { nav.follow = true; startAnim(); });
   function voiceIcon() {
     document.getElementById('nb-wave').style.display = nav.voice ? '' : 'none';
