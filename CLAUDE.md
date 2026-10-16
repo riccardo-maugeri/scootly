@@ -86,7 +86,8 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
   non finiscono in vicoli isolati. La rete si ricalcola quando cambiano regole a orario o correzioni.
 - `snap(x, y, mode, heading)` / `route(from, to, mode, { heading })`: con la direzione di marcia la partenza
   va sulla strada e nel verso coerenti (usato nei ricalcoli in navigazione).
-- Modalità pioggia: pavé ×2,5 e binari del tram ×3 nel costo (non nel tempo mostrato).
+- Modalità pioggia (`setRain`): pavé ×2,5 e binari del tram ×3 nel costo. Resta nel motore ma l'app non la usa più
+  (tolta su richiesta del proprietario; la vecchia chiave `scooter-pioggia` si cancella all'avvio).
 - Correzioni dell'utente per osmId: `vietata`, `aperta`, `senso`, `senso_inv`, `evita` (×3), `preferita` (×0,7),
   `chiusa` (per lavori, con `fino`: data ISO; scaduta = ignorata e tolta da `purgeExpired()`). In guida il
   pulsante "Strada chiusa" propone la via attuale e le prossime entro 400 m e le chiude per 3 giorni
@@ -118,7 +119,7 @@ In guida ~16 ms per immagine nel browser di prova.
 `scooter-corr` (correzioni), `scooter-casa`, `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
-che pesano di più), `scooter-pioggia`, `scooter-voce`.
+che pesano di più), `scooter-voce`.
 
 Tempi imparati: in navigazione vera `recPoint()` registra (ora, metri fatti) quando sei sul percorso con
 precisione ≤ 30 m; `recFlush()` (a fine viaggio e prima di ogni ricalcolo) calcola il tempo di ogni tratto,
