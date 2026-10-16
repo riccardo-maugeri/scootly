@@ -1,4 +1,4 @@
-# Scootly (Scooter Milano)
+# Scootly
 
 ## Scopo
 
