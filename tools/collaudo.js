@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Collaudo: prove automatiche da passare prima di pubblicare dati o motore nuovi.
-// Uso: node tools/collaudo.js [dati.json]   (predefinito: data/strade.json)
+// Uso: node tools/collaudo.js [dati.json] [--precedente dati-precedenti.json]   (predefinito: data/strade.json)
+// Con --precedente controlla anche che la mappa nuova non sia cambiata in modo anomalo (errori o
+// danneggiamenti su OpenStreetMap): in quel caso non si pubblica.
 // Esce con errore (codice 1) se anche una sola prova fallisce.
 'use strict';
 const fs = require('fs');
@@ -13,7 +15,10 @@ const mod = { exports: {} };
 new Function('module', m[1])(mod);
 const { Router } = mod.exports;
 
-const file = process.argv[2] || path.join(ROOT, 'data', 'strade.json');
+const args = process.argv.slice(2);
+const pi = args.indexOf('--precedente');
+const prevFile = pi >= 0 ? args.splice(pi, 2)[1] : null;
+const file = args[0] || path.join(ROOT, 'data', 'strade.json');
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const R = new Router(d);
 
@@ -41,6 +46,32 @@ check((d.poi || []).length > 5000, `luoghi di interesse: ${(d.poi || []).length}
 if (d.meta && d.meta.osm) {
   const days = (Date.now() - new Date(d.meta.osm)) / 864e5;
   check(days < 30, `mappa OSM del ${d.meta.osm.slice(0, 10)} (meno di 30 giorni fa)`);
+}
+
+// ---------- 1b. confronto con la mappa precedente ----------
+if (prevFile) {
+  console.log('1b. Confronto con la mappa precedente');
+  const o = JSON.parse(fs.readFileSync(prevFile, 'utf8'));
+  const ratio = (a, b) => b ? a / b : 1;
+  const nCiv = x => Object.values(x.addr).flat().length;
+  check(ratio(d.ways.length, o.ways.length) > 0.97, `vie: ${o.ways.length} -> ${d.ways.length} (al massimo -3%)`);
+  check(ratio(d.edges.length, o.edges.length) > 0.97, `tratti: ${o.edges.length} -> ${d.edges.length} (al massimo -3%)`);
+  check(ratio(nCiv(d), nCiv(o)) > 0.97, `civici: ${nCiv(o)} -> ${nCiv(d)} (al massimo -3%)`);
+  check(ratio((d.poi || []).length, (o.poi || []).length) > 0.9, `luoghi: ${(o.poi || []).length} -> ${(d.poi || []).length} (al massimo -10%)`);
+  // permessi per lo scooter cambiati sulle stesse vie
+  const old = new Map(o.ways.map(w => [w[0], w]));
+  let common = 0, changed = 0; const lostMain = [];
+  for (const w of d.ways) {
+    const ow = old.get(w[0]); if (!ow) continue;
+    common++;
+    if (ow[3] !== w[3] || ow[4] !== w[4]) {
+      changed++;
+      // strada principale (classi 0-3) che diventa del tutto vietata allo scooter
+      if (w[2] <= 3 && (ow[3] || ow[4]) && !(w[3] || w[4])) lostMain.push(`${d.names[w[1]] || 'senza nome'} (${w[0]})`);
+    }
+  }
+  check(changed <= Math.max(60, common * 0.01), `vie con permesso scooter cambiato: ${changed} su ${common} (al massimo l'1%)`);
+  check(lostMain.length <= 5, `strade principali diventate vietate allo scooter: ${lostMain.length} (al massimo 5)${lostMain.length ? ': ' + lostMain.slice(0, 10).join(', ') : ''}`);
 }
 
 // ---------- 2. tragitti di riferimento ----------

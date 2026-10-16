@@ -482,6 +482,8 @@ def main():
     ap.add_argument('--out', required=True)
     ap.add_argument('--regole', default=os.path.join(os.path.dirname(__file__), 'regole_milano.json'),
                     help='regole ufficiali del Comune che correggono OSM')
+    ap.add_argument('--rigoroso', action='store_true',
+                    help='errore se una regola del Comune cita una via che non c\'e\' piu\' (aggiornamento automatico)')
     ap.add_argument('--sfondo', help='file dove scrivere lo sfondo della mappa (parchi, acqua, ferrovie, edifici)')
     ap.add_argument('--cache', help='file dove salvare la lettura di OSM per rifare i dati piu\' in fretta')
     a = ap.parse_args()
@@ -834,6 +836,9 @@ def main():
         print(f'  ATTENZIONE: la regola {rule_of[osm] + 1} cita la via {osm} che non c\'e\' piu\' in OSM (o e\' fuori zona)', file=sys.stderr)
     for wid, sk in cond_skipped:
         print(f'  regola a orario non letta (way {wid}): {sk}', file=sys.stderr)
+    if a.rigoroso and set(override) - applied:
+        print('BLOCCATO: alcune regole del Comune non trovano piu\' la loro via (vedi ATTENZIONE sopra)', file=sys.stderr)
+        sys.exit(3)
     with open(a.out.rsplit('.', 1)[0] + '.note.json', 'w') as f:
         json.dump({'conditional': conditional, 'fixme': fixme,
                    'regole_mancanti': [[osm, rule_of[osm] + 1] for osm in sorted(set(override) - applied)],

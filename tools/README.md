@@ -10,6 +10,7 @@ Girano su un computer (o su GitHub), non sul telefono.
 | `check_data.py` | Controlla i dati e scrive un rapporto in italiano: differenze con ZTL e aree pedonali del Comune, strade "da verificare", regole a orario, pezzi di rete isolati, differenze con la versione precedente. |
 | `regole_milano.json` | Le regole ufficiali del Comune che correggono OpenStreetMap (ZTL, aree pedonali, divieti di transito), ognuna con motivo e ordinanza. Le applica `build_data.py`. |
 | `collaudo.js` | Prove automatiche da superare prima di pubblicare: dati completi e recenti, tragitti di riferimento a vari orari, regole note (Garibaldi, Monte Ceneri, Duomo), 300 tragitti a caso senza strade vietate né zone "solo destinatari" attraversate. Se una prova fallisce esce con errore. |
+| `eccezioni_comune.json` | Disaccordi con il Comune già esaminati e lasciati come in OpenStreetMap (casi dubbi). Ogni disaccordo **nuovo** blocca l'aggiornamento automatico. |
 | `compare_routes.js` | Calcola gli stessi tragitti con due versioni dei dati e mostra cosa cambia. |
 
 ## Fonti
@@ -26,8 +27,16 @@ Girano su un computer (o su GitHub), non sul telefono.
 
 `.github/workflows/aggiorna-mappa.yml` gira **ogni lunedì mattina** (e a mano da GitHub → Actions →
 "Aggiorna la mappa"): scarica le fonti, ricostruisce la mappa, scrive il rapporto, confronta i tragitti
-con la versione precedente, fa il collaudo e **pubblica solo se il collaudo passa**. Se fallisce, GitHub
-manda una mail e l'app resta con la mappa precedente.
+con la versione precedente, fa il collaudo e **pubblica solo se tutto passa**. Si ferma (GitHub manda una
+mail, l'app resta con la mappa precedente, il rapporto si scarica dalla pagina dell'esecuzione) se:
+
+- una regola del Comune cita una via che in OSM non c'è più (`build_data.py --rigoroso`);
+- compare un disaccordo nuovo con le aree pedonali/ZTL del Comune (`check_data.py --blocca-nuovi`):
+  va aggiunta una regola in `regole_milano.json` o, se dubbio, un'eccezione in `eccezioni_comune.json`;
+- la mappa è cambiata in modo anomalo rispetto alla settimana prima: oltre l'1% di vie con permesso
+  scooter diverso, più di 5 strade principali diventate vietate, o meno strade/civici/luoghi
+  (`collaudo.js --precedente`);
+- una qualsiasi prova del collaudo fallisce.
 
 ## Come si usano
 

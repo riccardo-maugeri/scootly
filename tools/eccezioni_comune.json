@@ -1,0 +1,18 @@
+{
+  "nota": "Disaccordi con il Comune gia' esaminati e lasciati come in OpenStreetMap, perche' dubbi (via solo in parte dentro l'area, area fuori dall'anello, Comune senza indicazioni). Non bloccano l'aggiornamento settimanale; ogni altro disaccordo nuovo si'.",
+  "eccezioni": [
+    {"osm": 448939718, "via": "Via Carlo Imbonati", "area": "CARLO IMBONATI", "perche": "solo in parte dentro l'area (62%)"},
+    {"osm": 260448638, "via": "Viale Certosa", "area": "Cavalcavia Monte Ceneri", "perche": "solo in parte dentro l'area (62%)"},
+    {"osm": 275564340, "via": "Viale Certosa", "area": "Cavalcavia Monte Ceneri", "perche": "solo in parte dentro l'area (62%)"},
+    {"osm": 275564342, "via": "Viale Certosa", "area": "Cavalcavia Monte Ceneri", "perche": "solo in parte dentro l'area (60%)"},
+    {"osm": 275565010, "via": "strada senza nome", "area": "Cavalcavia Monte Ceneri", "perche": "solo in parte dentro l'area (63%)"},
+    {"osm": 25946714, "via": "Via Luigi Canonica", "area": "Gramsci - Canonica - Sabatelli", "perche": "solo in parte dentro l'area (69%)"},
+    {"osm": 281275328, "via": "Piazzale Cimitero Monumentale", "area": "Monumentale", "perche": "il Comune non indica chi puo' entrare"},
+    {"osm": 304095813, "via": "Piazza Vetra", "area": "Pio IV", "perche": "solo in parte dentro l'area (69%)"},
+    {"osm": 172824079, "via": "Via dell'Ambrosiana", "area": "Pio XI", "perche": "solo in parte dentro l'area (68%)"},
+    {"osm": 274803760, "via": "strada senza nome", "area": "San Siro Eventi", "perche": "area fuori dall'anello"},
+    {"osm": 1501197011, "via": "strada senza nome", "area": "San Siro Eventi", "perche": "area fuori dall'anello"},
+    {"osm": 1501197015, "via": "strada senza nome", "area": "San Siro Eventi", "perche": "area fuori dall'anello"},
+    {"osm": 145014439, "via": "Via Tommaso Grossi", "area": "Tommaso Grossi", "perche": "divieto solo in un verso: gestito in regole_milano.json (motorcycle:forward)"}
+  ]
+}

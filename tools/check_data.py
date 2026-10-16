@@ -69,6 +69,9 @@ def main():
     ap.add_argument('--old')
     ap.add_argument('--out', required=True)
     ap.add_argument('--proposte', help='scrive qui le correzioni proposte (da rivedere a mano)')
+    ap.add_argument('--eccezioni', help='disaccordi con il Comune gia\' esaminati (tools/eccezioni_comune.json)')
+    ap.add_argument('--blocca-nuovi', action='store_true',
+                    help='esce con errore se ci sono disaccordi con il Comune nuovi (non nelle eccezioni)')
     a = ap.parse_args()
 
     d = json.load(open(a.data))
@@ -299,9 +302,33 @@ def main():
             L.append(f'| [{name_of(d, new_idx[osm])}]({OSM}{osm}) | {round(length)} | {perm_txt(ow[3], ow[4])} | {perm_txt(w[3], w[4])} |')
         L.append('')
 
+    # disaccordi nuovi (non ancora esaminati): in cima al rapporto
+    known = set()
+    if a.eccezioni:
+        known = {e['osm'] for e in json.load(open(a.eccezioni))['eccezioni']}
+    nuovi = {}
+    for p in proposals:
+        if p['osm'] not in known:
+            nuovi.setdefault(p['osm'], p)
+    if a.eccezioni:
+        H = ['## ⚠️ Disaccordi nuovi con il Comune\n']
+        if nuovi:
+            H.append('Da esaminare: aggiungere una regola in `tools/regole_milano.json` oppure, se dubbi, '
+                     'in `tools/eccezioni_comune.json`.\n')
+            H += [f"- [{p['via']}]({OSM}{osm}) — {p['area']} ({p['tipo']}, {round(p['dentro'] * 100)}% dentro)"
+                  for osm, p in nuovi.items()]
+        else:
+            H.append('Nessuno.')
+        H.append('')
+        L[5:5] = H  # subito dopo le righe iniziali (date e numeri)
     open(a.out, 'w').write('\n'.join(L) + '\n')
     if a.proposte:
         json.dump(proposals, open(a.proposte, 'w'), ensure_ascii=False, indent=1)
+    if a.blocca_nuovi and nuovi:
+        print(f'BLOCCATO: {len(nuovi)} disaccordi nuovi con il Comune (vedi il rapporto)', file=sys.stderr)
+        for osm, p in nuovi.items():
+            print(f"  {p['via']} ({osm}) — {p['area']}", file=sys.stderr)
+        sys.exit(1)
     print('Rapporto scritto in', a.out, file=sys.stderr)
 
 

@@ -29,7 +29,7 @@ Nessun framework, nessuna compilazione, nessuna dipendenza: GitHub Pages serve i
 | `data/rapporto.md` | Rapporto in italiano sull'ultima mappa generata (`tools/check_data.py`). |
 | `sw.js` | Service worker: copia app e mappa sul telefono per usarle anche senza rete. Pagine: prima la rete; mappa: subito la copia salvata, la nuova si scarica in sottofondo. |
 | `tools/` | Strumenti per costruire, controllare e collaudare i dati (vedi `tools/README.md`). |
-| `.github/workflows/aggiorna-mappa.yml` | Ogni lunedì ricostruisce la mappa e la pubblica solo se `tools/collaudo.js` passa. |
+| `.github/workflows/aggiorna-mappa.yml` | Ogni lunedì ricostruisce la mappa e la pubblica solo se passano i controlli (regole del Comune tutte applicate, nessun disaccordo nuovo con il Comune, nessun cambiamento anomalo, collaudo). Dettagli in `tools/README.md`. |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon.png` | Installazione come app sulla Home. |
 
 Dentro `index.html`, in ordine:

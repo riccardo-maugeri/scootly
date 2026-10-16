@@ -39,13 +39,16 @@ jobs:
       - name: Costruisci la mappa
         run: |
           cp data/strade.json fonti/precedente.json
+          # --rigoroso: si ferma se una regola del Comune non trova piu' la sua via
           python3 tools/build_data.py --osm fonti/lombardia.osm.pbf --osm-state fonti/lombardia.state.txt \
-            --civici fonti/civici.csv --out fonti/strade.json --sfondo fonti/sfondo.json
+            --civici fonti/civici.csv --out fonti/strade.json --sfondo fonti/sfondo.json --rigoroso
 
       - name: Rapporto e confronto con la versione precedente
         run: |
+          # --blocca-nuovi: si ferma se compare un disaccordo nuovo con il Comune (non in eccezioni_comune.json)
           python3 tools/check_data.py --data fonti/strade.json --aree fonti/aree.geojson \
-            --old fonti/precedente.json --out fonti/rapporto.md
+            --old fonti/precedente.json --out fonti/rapporto.md \
+            --eccezioni tools/eccezioni_comune.json --blocca-nuovi
           node tools/compare_routes.js fonti/precedente.json fonti/strade.json | tee fonti/confronto.txt
           {
             echo '## Mappa aggiornata'
@@ -59,7 +62,17 @@ jobs:
       - name: Collaudo (se fallisce, non si pubblica nulla)
         env:
           SCOOTLY_TRAGITTI: ${{ secrets.SCOOTLY_TRAGITTI }}   # tragitti personali (facoltativo, privato)
-        run: node tools/collaudo.js fonti/strade.json
+        run: node tools/collaudo.js fonti/strade.json --precedente fonti/precedente.json
+
+      - name: Conserva il rapporto (anche se qualcosa e' andato storto)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapporto-mappa
+          path: |
+            fonti/rapporto.md
+            fonti/confronto.txt
+          if-no-files-found: ignore
 
       - name: Pubblica
         run: |
