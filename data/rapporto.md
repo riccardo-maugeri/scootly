@@ -2,7 +2,7 @@
 
 - Mappa OpenStreetMap del: **2026-10-15T01:45:27Z**
 - Numeri civici del Comune aggiornati al: **20260928**
-- Zona: zona: filovia 90/91 + 150 m; strade fino a 500 m; regole: scooter 125cc = motorcycle (moped ignorato); 144 vie corrette con le regole del Comune
+- Zona: zona: filovia 90/91 + 150 m; strade fino a 500 m; regole: scooter 125cc = motorcycle (moped ignorato); 145 vie corrette con le regole del Comune
 - 16104 vie, 18338 tratti, 872 divieti di svolta, 27247 civici, 14556 luoghi di interesse
 
 ## 1. Differenze con le aree pedonali e ZTL del Comune
@@ -142,19 +142,20 @@ La rete principale percorribile in scooter copre il **94.5%** dei tratti. Il res
 - [Via Nicolò Tartaglia](https://www.openstreetmap.org/way/290058036) (243 m)
 - [Largo Arturo Toscanini](https://www.openstreetmap.org/way/274980275) (238 m)
 - [Largo Francesco Richini](https://www.openstreetmap.org/way/1491107212) (223 m)
-- [Via Tommaso Grossi](https://www.openstreetmap.org/way/145014439) (219 m)
 - [Piazzale Veronica Gambara](https://www.openstreetmap.org/way/269035960) (216 m)
 - [Via Abramo Lincoln](https://www.openstreetmap.org/way/42026982) (211 m)
 - [Via Romualdo Bonfadini](https://www.openstreetmap.org/way/443076563) (209 m)
 - [Via Carlo Cafiero](https://www.openstreetmap.org/way/25527128) (208 m)
 - [Via Enrico Gonzales](https://www.openstreetmap.org/way/265864426) (201 m)
 - [Viale Alcide De Gasperi](https://www.openstreetmap.org/way/4524740) (191 m)
+- [Via Angelo Fumagalli](https://www.openstreetmap.org/way/24870150) (186 m)
 
 ## 5. Differenze con la mappa usata finora
 
 - Vie nuove (non c'erano): 0; vie sparite: 0
-- Vie in cui cambia il permesso per lo scooter: **0**
+- Vie in cui cambia il permesso per lo scooter: **1**
 
 | Via | Metri | Prima | Adesso |
 |---|---|---|---|
+| [Via Tommaso Grossi](https://www.openstreetmap.org/way/145014439) | 110 | doppio senso | senso unico |
 

@@ -50,21 +50,13 @@
       "fonte": "ord. 697/2021"
     },
     {
-      "osm": [4892135, 30895367, 30895499, 88546039, 118993120, 183860216, 277516082, 1278712314,
-              30689486, 277516085,
-              4604796, 123046290, 168553830, 168553831, 173174615,
-              21629777, 28032419, 168553846, 1083716125, 1083716126, 21772697],
+      "osm": [4892135, 30895367, 30895499, 88546039, 118993120, 183860216, 277516082, 1278712314, 30689486, 277516085, 4604796, 123046290, 168553830, 168553831, 173174615, 21629777, 28032419, 168553846, 1083716125, 1083716126, 21772697],
       "tag": {"motorcycle": "no"},
       "motivo": "Aree pedonali dei Navigli (Alzaia Naviglio Grande, Ripa di Porta Ticinese, Alzaia Naviglio Pavese, Via Emilio Gola): moto non ammesse.",
       "fonte": "dataset Aree pedonali e ZTL, tipo AP"
     },
     {
-      "osm": [172453240, 168773915, 189734745, 142387176, 27625280, 1514078351, 276506574, 691626286, 4857477,
-              111655183, 273969557, 1446734713, 10753880, 163757303, 274829009, 685460553, 310796751,
-              4520053, 7980551, 7980552, 260839792, 998382959, 280759770, 288215246, 37338857,
-              43015455, 261934242, 262212060, 286590850, 286590873, 286590874, 275209602, 274420185,
-              28734907, 687393623, 998382967, 279397002, 279397003, 42453104, 279743262, 160615595,
-              260362446, 260362447, 183999090],
+      "osm": [172453240, 168773915, 189734745, 142387176, 27625280, 1514078351, 276506574, 691626286, 4857477, 111655183, 273969557, 1446734713, 10753880, 163757303, 274829009, 685460553, 310796751, 4520053, 7980551, 7980552, 260839792, 998382959, 280759770, 288215246, 37338857, 43015455, 261934242, 262212060, 286590850, 286590873, 286590874, 275209602, 274420185, 28734907, 687393623, 998382967, 279397002, 279397003, 42453104, 279743262, 160615595, 260362446, 260362447, 183999090],
       "tag": {"motorcycle": "no"},
       "motivo": "Aree pedonali del Comune senza deroga per le moto (Brera-Fiori Oscuri, Marconi, Beccaria, Bergamini, Cardinale Federico, Corso Concordia, Colonne di San Lorenzo, Filodrammatici, Foscolo-Berchet, Gramsci, Grassi-Visconti, Pio XI, Pio IV, Pontebba, Romagna, San Calimero, San Tomaso, Santa Croce, Sarpi, Stazione Genova, Tommaseo, Toscana, Giulini, Pattari, Piazza San Marco, XXV Aprile, Magistretti).",
       "fonte": "dataset Aree pedonali e ZTL, tipo AP"
@@ -80,6 +72,12 @@
       "tag": {"motorcycle": "no"},
       "motivo": "Divieti di transito ammessi solo a taxi, bus, tram o autorizzati (Corsia dei Servi, Largo Cairoli-Callas, Cappellari, Dogana, Piazza IV Novembre, Piazza Luigi di Savoia, Via San Marco).",
       "fonte": "dataset Aree pedonali e ZTL, tipo DT"
+    },
+    {
+      "osm": [145014439],
+      "tag": {"motorcycle:forward": "no"},
+      "motivo": "Via Tommaso Grossi: nella direzione da Piazza Cordusio a Via Santa Margherita transitano solo taxi e autorizzati (la via in OSM e' disegnata proprio in questo verso). Il verso opposto resta come in OSM.",
+      "fonte": "ord. 66912/2011 (carreggiata riservata)"
     }
   ]
 }
