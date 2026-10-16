@@ -780,7 +780,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
         steps[i].turn = best ? best.turn : 'dritto'; if (best && best.turn === 'rotonda') { steps[i].exitName = best.exitName; steps[i].verso = best.verso; }
       }
       const kept = steps.filter((s, i) => s.len >= 8 || steps.length === 1 || (i > 0 && i < steps.length - 1));
-      return { time: Math.max(1, total - extra), risky: rainM, length, line, turns: turns.map(t => ({ d0: t.d0, turn: t.turn, name: t.name, motoOnly: t.motoOnly, exit: t.exit, exitName: t.exitName, verso: t.verso })), steps: kept.map(s => ({ name: s.name, len: s.len, turn: s.turn, motoOnly: s.motoOnly, way: s.way, d0: s.d0, at: s.at, exitName: s.exitName, verso: s.verso })), start: [S.px, S.py], end: [T.px, T.py], edges: parts.map(p => 2 * p.e + p.dir), d0s, t0s: t0s.map(x => x * (tAcc ? Math.max(1, total - extra) / tAcc : 1)) };
+      return { time: Math.max(1, total - extra), risky: rainM, length, line, turns: turns.map(t => ({ d0: t.d0, ang: t.ang, same: !!t.same, turn: t.turn, name: t.name, motoOnly: t.motoOnly, exit: t.exit, exitName: t.exitName, verso: t.verso })), steps: kept.map(s => ({ name: s.name, len: s.len, turn: s.turn, motoOnly: s.motoOnly, way: s.way, d0: s.d0, at: s.at, exitName: s.exitName, verso: s.verso })), start: [S.px, S.py], end: [T.px, T.py], edges: parts.map(p => 2 * p.e + p.dir), d0s, t0s: t0s.map(x => x * (tAcc ? Math.max(1, total - extra) / tAcc : 1)) };
     }
   }
 
@@ -1824,18 +1824,67 @@ ${steps}
     const seg = cum[hi] - cum[lo], t = seg > 0 ? Math.max(0, Math.min(1, (along - cum[lo]) / seg)) : 0;
     return { p: [L[lo][0] + (L[hi][0] - L[lo][0]) * t, L[lo][1] + (L[hi][1] - L[lo][1]) * t], h: Math.atan2(L[hi][1] - L[lo][1], L[hi][0] - L[lo][0]) };
   }
-  const PHRASE = { 'a sinistra': 'gira a sinistra', 'a destra': 'gira a destra', 'leggermente a sinistra': 'tieni la sinistra', 'leggermente a destra': 'tieni la destra' };
+  // ---------- Voce: come Google Maps ----------
+  // Frasi e momenti come il navigatore di Google. Per ogni manovra, al massimo tre frasi, a tempi
+  // che dipendono dalla velocita' (v, in m/s, almeno 25 km/h):
+  //  1. appena fatta la manovra precedente, se la prossima e' lontana: "Continua su Via X per 800 metri"
+  //  2. preavviso, circa 22 s prima (almeno 160 m):                "Tra 200 metri, svolta a destra in Via X"
+  //  3. all'incrocio, circa 7 s prima (almeno 35 m):                 "Svolta a destra in Via X" (+ ", poi ..." se la seguente e' subito dopo)
+  // L'arrivo e' l'ultima "manovra": "Tra 100 metri, la destinazione si trova sulla destra".
+  const VERB = { 'a sinistra': 'svolta a sinistra', 'a destra': 'svolta a destra', 'leggermente a sinistra': 'svolta leggermente a sinistra', 'leggermente a destra': 'svolta leggermente a destra', 'dritto': 'prosegui dritto' };
+  const named = st => !!st.name && st.name !== 'strada senza nome';
   function phrase(st) {
-    const named = st.name && st.name !== 'strada senza nome';
-    if (st.turn === 'rotonda') return `alla rotonda prendi la ${st.exitName} uscita, ${st.verso}` + (named ? `, in ${st.name}` : '');
-    const base = PHRASE[st.turn] || 'prosegui'; return named ? `${base} in ${st.name}` : base;
+    if (st.arrive) return arriveText();
+    if (st.turn === 'rotonda') return `alla rotonda prendi la ${st.exitName} uscita` + (named(st) ? ` e imbocca ${st.name}` : '');
+    const a = Math.abs(st.ang || 0);
+    const v = a > 2.7 ? "fai un'inversione a U" : a > 2.2 && (st.turn === 'a sinistra' || st.turn === 'a destra') ? 'svolta nettamente ' + st.turn : VERB[st.turn] || 'prosegui';
+    if (!named(st)) return v;
+    return st.same ? `${v} per rimanere su ${st.name}` : `${v} in ${st.name}`;
   }
+  // da che parte e' l'arrivo, guardando nel verso di marcia dell'ultimo tratto
+  function arriveSide() {
+    const r = nav.route, L = r.line, n = L.length; if (n < 2 || !state.to) return '';
+    const [x1, y1] = L[n - 2], [x2, y2] = L[n - 1], dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy) || 1;
+    const tx = state.to.p[0] - x2, ty = state.to.p[1] - y2;
+    if (Math.hypot(tx, ty) < 8) return '';
+    const cross = (dx * ty - dy * tx) / l, fwd = (dx * tx + dy * ty) / l;
+    if (Math.abs(cross) < 6 || Math.abs(cross) < Math.abs(fwd) * 0.5) return '';
+    return cross > 0 ? 'sulla sinistra' : 'sulla destra';
+  }
+  const walkM = () => state.to && nav.route ? Math.hypot(state.to.p[0] - nav.route.end[0], state.to.p[1] - nav.route.end[1]) : 0;
+  function arriveText() { const sd = arriveSide(); return sd ? `la destinazione si trova ${sd}` : 'arriverai a destinazione'; }
+  function arrivedText() {
+    const w = walkM();
+    if (w > 40) return `Sei arrivato. Lascia qui lo scooter: la destinazione è a ${distText(w)} a piedi.`;
+    const sd = arriveSide(); return sd ? `La destinazione si trova ${sd}.` : 'Sei arrivato a destinazione.';
+  }
+  // distanze dette come Google: 50, 100, 150... 300, 400... metri; poi 1, 1,5, 2 chilometri
+  function distText(d) {
+    if (d >= 950) { const km = Math.round(d / 500) / 2; return km === 1 ? '1 chilometro' : `${String(km).replace('.', ',')} chilometri`; }
+    const m = d > 300 ? Math.round(d / 100) * 100 : d > 90 ? Math.round(d / 50) * 50 : Math.max(10, Math.round(d / 10) * 10);
+    return `${m} metri`;
+  }
+  // scritta in alto nella guida: "200 m", "1,2 km"
+  const round = d => d >= 1000 ? (Math.round(d / 100) / 10).toFixed(1).replace('.', ',') + ' km' : (d > 300 ? Math.round(d / 100) * 100 : d > 90 ? Math.round(d / 50) * 50 : Math.max(10, Math.round(d / 10) * 10)) + ' m';
+  const COMPASS = ['est', 'nord-est', 'nord', 'nord-ovest', 'ovest', 'sud-ovest', 'sud', 'sud-est'];
+  const compass = h => COMPASS[((Math.round(h / (Math.PI / 4)) % 8) + 8) % 8];
+  // La voce: la migliore voce italiana del telefono. Le voci "Avanzata"/"Premium" (da scaricare in
+  // Impostazioni > Accessibilita' > Contenuti letti > Voci > Italiano) sono le piu' naturali.
   let itVoice = null;
-  function say(t) {
-    if (!nav.voice || !window.speechSynthesis) return;
+  function pickVoice() {
     try {
-      if (!itVoice) itVoice = speechSynthesis.getVoices().find(v => /^it/i.test(v.lang)) || null;
-      const u = new SpeechSynthesisUtterance(t); u.lang = 'it-IT'; if (itVoice) u.voice = itVoice; u.rate = 1.05;
+      const vs = speechSynthesis.getVoices().filter(v => /^it/i.test(v.lang)); if (!vs.length) return;
+      const score = v => (/premium/i.test(v.name) ? 4 : 0) + (/enhanced|avanzat|migliorat/i.test(v.name) ? 3 : 0) + (/federica|alice|emma|paola|elsa/i.test(v.name) ? 1 : 0) + (v.localService ? 0.5 : 0);
+      itVoice = vs.sort((a, b) => score(b) - score(a))[0];
+    } catch (e) {}
+  }
+  if (window.speechSynthesis) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {} }
+  function say(t) {
+    if (!nav.voice || !window.speechSynthesis || !t) return;
+    try {
+      if (!itVoice) pickVoice();
+      speechSynthesis.cancel(); // l'indicazione nuova sostituisce quella vecchia, come Google
+      const u = new SpeechSynthesisUtterance(t); u.lang = 'it-IT'; if (itVoice) u.voice = itVoice; u.rate = 1; u.pitch = 1;
       speechSynthesis.speak(u);
     } catch (e) {}
   }
@@ -1844,16 +1893,72 @@ ${steps}
     for (let k = 0; k < tu.length; k++) if (tu[k].d0 > nav.along + 2) return { k, st: tu[k], dist: tu[k].d0 - nav.along };
     return null;
   }
-  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
-  // frase completa per la prossima indicazione (usata alla partenza e dopo un ricalcolo)
-  function instruction(nt, remaining) {
-    if (!nt) return `Prosegui per ${round(remaining)} metri fino all'arrivo.`;
-    if (nt.dist <= 40) { nav.spoken[nt.k + 'n'] = nav.spoken[nt.k + 'f'] = 1; return cap(phrase(nt.st)) + '.'; }
-    if (nt.dist <= 170) { nav.spoken[nt.k + 'f'] = 1; return `Tra ${round(nt.dist)} metri, ${phrase(nt.st)}.`; }
-    nav.spoken[nt.k + 'p'] = 1;
-    return `Prosegui per ${round(nt.dist)} metri, poi ${phrase(nt.st)}.`;
+  // prossima manovra per la voce: le svolte e, alla fine, l'arrivo
+  function nextMan() {
+    const nt = nextTurn(); if (nt) return nt;
+    const k = (nav.route.turns || []).length;
+    return { k, st: { arrive: true, d0: nav.route.length }, dist: Math.max(0, nav.route.length - nav.along) };
   }
-  const round = d => d > 250 ? Math.round(d / 100) * 100 : d > 60 ? Math.round(d / 50) * 50 : Math.max(10, Math.round(d / 10) * 10);
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  // velocita' per decidere quando parlare: media degli ultimi secondi (un singolo salto del GPS non anticipa la voce)
+  const speedV = () => Math.max(7, Math.min(20, nav.vs || 0));
+  const limits = () => { const v = speedV(); return { act: Math.min(130, Math.max(35, v * 7)), prep: Math.max(160, v * 22) }; };
+  // via su cui sei adesso
+  function streetNow() {
+    const st = nav.route.steps || []; let nm = '';
+    for (const s of st) { if (s.d0 <= nav.along + 1) nm = s.name; else break; }
+    return nm && nm !== 'strada senza nome' ? nm : '';
+  }
+  // frase all'incrocio, con la manovra seguente se arriva subito dopo
+  function actionText(m) {
+    let t = cap(phrase(m.st));
+    if (!m.st.arrive) {
+      const TU = nav.route.turns, n2 = TU[m.k + 1], gap = n2 ? n2.d0 - m.st.d0 : nav.route.length - m.st.d0;
+      if (gap < Math.max(60, speedV() * 6)) {
+        if (n2) { t += ', poi ' + phrase(n2); nav.spoken[(m.k + 1) + 'p'] = nav.spoken[(m.k + 1) + 'c'] = 1; }
+        else { t += ', poi ' + arriveText(); nav.spoken[(m.k + 1) + 'p'] = nav.spoken[(m.k + 1) + 'c'] = 1; }
+      }
+    }
+    nav.spoken[m.k + 'a'] = nav.spoken[m.k + 'p'] = nav.spoken[m.k + 'c'] = 1;
+    return t + '.';
+  }
+  function prepText(m) { nav.spoken[m.k + 'p'] = nav.spoken[m.k + 'c'] = 1; return `Tra ${distText(m.dist)}, ${phrase(m.st)}.`; }
+  function contText(m) {
+    nav.spoken[m.k + 'c'] = 1; nav.spoken[m.k + 'cd'] = m.dist; const nm = streetNow();
+    return nm ? `Continua su ${nm} per ${distText(m.dist)}.` : `Continua per ${distText(m.dist)}.`;
+  }
+  // l'indicazione giusta adesso (alla partenza e dopo un ricalcolo)
+  function instruction() {
+    const m = nextMan(), { act, prep } = limits();
+    if (m.dist <= act) return actionText(m);
+    if (m.dist <= prep + 60) return prepText(m);
+    return contText(m);
+  }
+  // frase della partenza: "Procedi in direzione nord su Via X", poi la prima indicazione se e' vicina
+  function startText() {
+    const L = nav.route.line; let i = 1; while (i < L.length - 1 && Math.hypot(L[i][0] - L[0][0], L[i][1] - L[0][1]) < 15) i++;
+    const h = L.length > 1 ? Math.atan2(L[i][1] - L[0][1], L[i][0] - L[0][0]) : Math.PI / 2;
+    const nm = (nav.route.steps[0] || {}).name;
+    let t = `Procedi in direzione ${compass(h)}` + (nm && nm !== 'strada senza nome' ? ` su ${nm}` : '');
+    const m = nextMan(), { act, prep } = limits();
+    nav.spoken[m.k + 'c'] = 1;
+    if (m.dist <= act) t += ', poi ' + actionText(m).replace(/\.$/, '').replace(/^./, c => c.toLowerCase());
+    else if (m.dist <= prep + 60) t += ', poi tra ' + distText(m.dist) + ' ' + phrase(m.st);
+    return t + '.';
+  }
+  // da chiamare a ogni lettura GPS: dice la frase giusta al momento giusto
+  function voiceTick() {
+    const m = nextMan(), { act, prep } = limits(), k = m.k, TU = nav.route.turns || [], prev = TU[k - 1];
+    const doneManeuver = !prev || nav.along > prev.d0 + 15;
+    if (m.dist <= act) { if (!nav.spoken[k + 'a'] && !m.st.arrive) say(actionText(m)); return; }
+    if (m.dist <= prep) { if (!nav.spoken[k + 'p'] && m.dist > act + 25) say(prepText(m)); return; }
+    if (doneManeuver && !nav.spoken[k + 'c'] && !nav.spoken[k + 'p']) {
+      if (m.dist <= prep + 150) say(prepText(m)); else say(contText(m));
+      return;
+    }
+    // tratto lungo (oltre 2 km): un promemoria a 1 km
+    if (m.dist <= 1050 && m.dist > prep + 300 && !nav.spoken[k + 'm'] && nav.spoken[k + 'c'] && nav.spoken[k + 'cd'] > 1800) { nav.spoken[k + 'm'] = 1; say(`Tra 1 chilometro, ${phrase(m.st)}.`); }
+  }
   function angleTo(a, b, f) { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * f; }
 
   // g = dati della lettura GPS: { acc: precisione in m, heading: direzione (radianti), speed: m/s }
@@ -1885,29 +1990,13 @@ ${steps}
       nav.idx = pr.i; nav.along = pr.along;
     } else if (g.heading != null) nav.heading = angleTo(nav.heading, g.heading, 0.5);
     if (g.speed != null && g.speed >= 0) nav.speed = g.speed;
+    if (nav.speed != null) nav.vs = nav.vs == null ? nav.speed : nav.vs * 0.8 + nav.speed * 0.2;
     nav.onRoute = onRoute; nav.fixT = now;
     const remaining = Math.max(0, nav.route.length - nav.along);
-    if (onRoute && remaining < 20 && !nav.arrived) { nav.arrived = true; saveTrip(); say('Sei arrivato.'); toast('Sei arrivato'); setTimeout(stopNav, 2500); }
+    if (onRoute && remaining < 20 && !nav.arrived) { nav.arrived = true; saveTrip(); say(arrivedText()); toast('Sei arrivato'); setTimeout(stopNav, 4000); }
     const nt = nextTurn();
-    if (nav.announce != null && !nav.arrived) { say(nav.announce + instruction(nt, remaining)); nav.announce = null; }
-    else if (nt && !nav.arrived) {
-      const key = nt.k;
-      const TU = nav.route.turns, prev = TU[key - 1];
-      // 1) appena fatta la manovra precedente: annuncia subito la prossima
-      if (!nav.spoken[key + 'p'] && nt.dist > 170 && (!prev || nav.along > prev.d0 + 20)) {
-        nav.spoken[key + 'p'] = 1; say(`Prosegui per ${round(nt.dist)} metri, poi ${phrase(nt.st)}.`);
-      }
-      // 2) circa 150 metri prima
-      else if (nt.dist <= 170 && nt.dist > 60 && !nav.spoken[key + 'f']) { nav.spoken[key + 'f'] = nav.spoken[key + 'p'] = 1; say(`Tra ${round(nt.dist)} metri, ${phrase(nt.st)}.`); }
-      // 3) proprio all'incrocio (e, se la manovra dopo e' vicinissima, anche quella)
-      else if (nt.dist <= 35 && !nav.spoken[key + 'n']) {
-        nav.spoken[key + 'n'] = nav.spoken[key + 'f'] = nav.spoken[key + 'p'] = 1;
-        let t = cap(phrase(nt.st));
-        const n2 = TU[key + 1];
-        if (n2 && n2.d0 - nt.st.d0 < 70) { t += ', poi subito ' + phrase(n2); nav.spoken[(key + 1) + 'p'] = nav.spoken[(key + 1) + 'f'] = 1; }
-        say(t + '.');
-      }
-    }
+    if (nav.announce != null && !nav.arrived) { say(nav.announce + instruction()); nav.announce = null; }
+    else if (!nav.arrived && onRoute) voiceTick();
     nav.dirty = true; // nuova lettura: ridisegna almeno una volta
     renderNav(nt, remaining); startAnim();
   }
@@ -2031,7 +2120,7 @@ ${steps}
     const counted = recFlush(); // il pezzo gia' fatto vale comunque per imparare (true = viaggio gia' contato)
     state.moto = r; state.car = null; prepRoute(r); recStart();
     if (nav.rec && counted) nav.rec.counted = true; // stesso viaggio: non contarlo due volte
-    nav.announce = typeof announce === 'string' ? announce : announce ? 'Ricalcolo il percorso. ' : '';
+    nav.announce = typeof announce === 'string' ? announce : '';
     nav.fixT = 0;
     update(p, { acc: nav.acc, heading, speed: nav.speed });
   }
@@ -2039,11 +2128,11 @@ ${steps}
     const ic2 = k => `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${TURN_IC[k] || TURN_IC.dritto}</svg>`;
     if (nt) {
       document.getElementById('nt-ic').innerHTML = ic2(nt.st.turn);
-      document.getElementById('nt-dist').textContent = round(nt.dist) + ' m';
+      document.getElementById('nt-dist').textContent = round(nt.dist);
       document.getElementById('nt-name').innerHTML = (nt.st.turn === 'rotonda' ? `Rotonda: ${esc(nt.st.exitName)} uscita, ${esc(nt.st.verso)}<br>` : '') + esc(nt.st.name) + (nt.st.motoOnly ? '<span class="tag">solo moto</span>' : '');
     } else {
       document.getElementById('nt-ic').innerHTML = ic2('arrivo');
-      document.getElementById('nt-dist').textContent = round(remaining) + ' m';
+      document.getElementById('nt-dist').textContent = round(remaining);
       document.getElementById('nt-name').textContent = 'Arrivo: ' + (state.to ? state.to.label : '');
     }
     const secs = Math.max(0, nav.route.time - timeAt(nav.along)) * timeFactor().f;
@@ -2062,7 +2151,7 @@ ${steps}
     if (!state.moto || !state.to) return;
     stopLocate(); // in navigazione il GPS lo ascolta la navigazione stessa
     nav.on = true; nav.sim = sim; nav.follow = true; nav.first = !sim; nav.arrived = false; nav.pos = null;
-    nav.speed = null; nav.fixT = 0; nav.acc = 5; nav.disp = null; nav.goodT = Date.now(); nav.weak = false; nav.outWarned = false;
+    nav.speed = null; nav.vs = null; nav.fixT = 0; nav.acc = 5; nav.disp = null; nav.goodT = Date.now(); nav.weak = false; nav.outWarned = false;
     nav.trip = sim ? null : { t0: Date.now(), pred: state.moto.time, len: state.moto.length, rer: 0, h: new Date().getHours() };
     prepRoute(state.moto); recStart();
     document.body.classList.add('navmode'); navtop.hidden = false; navbot.hidden = false;
@@ -2071,7 +2160,7 @@ ${steps}
     { const L0 = state.moto.line, h0 = L0.length > 1 ? Math.atan2(L0[1][1] - L0[0][1], L0[1][0] - L0[0][0]) : Math.PI / 2;
       nav.disp = L0[0].slice(); nav.heading = h0; view.rot = Math.PI / 2 - h0; view.cx = nav.disp[0]; view.cy = nav.disp[1]; }
     nav.announce = null;
-    say((sim ? 'Simulazione. Partiamo. ' : 'Partiamo. ') + instruction(nextTurn(), nav.route.length));
+    say(startText());
     keepAwake();
     if (sim) {
       nav.simD = 0; const speed = 8.5 * 3; // circa 30 km/h, 3 volte più veloce
