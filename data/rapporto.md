@@ -5,6 +5,10 @@
 - Zona: zona: filovia 90/91 + 150 m; strade fino a 500 m; regole: scooter 125cc = motorcycle (moped ignorato); 145 vie corrette con le regole del Comune
 - 16104 vie, 18338 tratti, 872 divieti di svolta, 27247 civici, 14556 luoghi di interesse
 
+## ⚠️ Disaccordi nuovi con il Comune
+
+Nessuno.
+
 ## 1. Differenze con le aree pedonali e ZTL del Comune
 
 Dove OpenStreetMap e il Comune non sono d'accordo su chi può passare. Le linee a confine di un'area possono essere falsi allarmi.
@@ -153,9 +157,8 @@ La rete principale percorribile in scooter copre il **94.5%** dei tratti. Il res
 ## 5. Differenze con la mappa usata finora
 
 - Vie nuove (non c'erano): 0; vie sparite: 0
-- Vie in cui cambia il permesso per lo scooter: **1**
+- Vie in cui cambia il permesso per lo scooter: **0**
 
 | Via | Metri | Prima | Adesso |
 |---|---|---|---|
-| [Via Tommaso Grossi](https://www.openstreetmap.org/way/145014439) | 110 | doppio senso | senso unico |
 
