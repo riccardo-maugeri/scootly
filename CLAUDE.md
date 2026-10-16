@@ -98,7 +98,7 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
 
 ### Apertura e introduzione
 
-Apertura (`#splash`, a ogni avvio, fa da schermata di caricamento): icona che entra con lo scooter, anelli,
+Apertura (`#splash`, a ogni avvio, fa da schermata di caricamento): icona che entra con lo scooter, alone morbido (una volta sola, niente animazioni ripetute),
 nome lettera per lettera, barra di caricamento. Sparisce quando la mappa è pronta (evento `scootly-ready`,
 mandato anche se la mappa non si carica), dopo almeno 2,6 s alla prima apertura e 0,9 s (versione veloce)
 le volte dopo; al massimo 8 s; a mappa pronta un tocco la salta. Poi (evento `scootly-splash`) parte l'introduzione.
