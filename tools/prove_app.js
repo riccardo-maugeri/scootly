@@ -49,7 +49,7 @@ function check(ok, msg) { console.log((ok ? '  ok   ' : '  NO   ') + msg); if (!
     const page = await ctx.newPage(); page.errors = [];
     page.on('pageerror', e => page.errors.push(e.message));
     page.on('dialog', dg => dg.accept(page.answer || undefined));
-    page.ready = async () => { await page.waitForFunction(() => !document.getElementById('card').textContent.includes('Carico la mappa'), null, { timeout: 30000 }); await page.waitForTimeout(1500); };
+    page.ready = async () => { await page.waitForFunction(() => !document.getElementById('card').textContent.includes('Carico la mappa') && document.getElementById('splash').hidden, null, { timeout: 30000 }); await page.waitForTimeout(1200); };
     page.dest = async q => { await page.fill('#q-to', q); await page.waitForTimeout(400); await page.keyboard.press('Enter'); await page.waitForTimeout(1500); };
     await page.goto(URL); await page.ready();
     return { ctx, page };
@@ -67,6 +67,7 @@ function check(ok, msg) { console.log((ok ? '  ok   ' : '  NO   ') + msg); if (!
   console.log('1b. Introduzione alla prima apertura');
   {
     const { ctx, page } = await phone({ intro: true });
+    check(await page.$eval('#splash', e => e.hidden), "l'apertura animata sparisce da sola quando la mappa è pronta");
     check(await page.$eval('#intro', e => !e.hidden), "alla prima apertura c'è l'introduzione");
     check(await page.evaluate(() => window.__intro === true), "durante l'introduzione la posizione non viene chiesta");
     await page.waitForTimeout(2500); await page.click('.in-page.on [data-in="next"]'); await page.waitForTimeout(1500);

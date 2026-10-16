@@ -96,9 +96,15 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
   (solo i tratti del percorso, non tutta la via); dalla schermata correzioni: oggi, 1 settimana, 1 mese.
 - Il percorso "auto" è calcolato solo per confronto.
 
-### Introduzione (prima apertura)
+### Apertura e introduzione
 
-Overlay `#intro` (HTML, stile e script propri, prima dello script dell'interfaccia: si vede subito, mentre la mappa si
+Apertura (`#splash`, a ogni avvio, fa da schermata di caricamento): icona che entra con lo scooter, anelli,
+nome lettera per lettera, barra di caricamento. Sparisce quando la mappa è pronta (evento `scootly-ready`,
+mandato anche se la mappa non si carica), dopo almeno 2,6 s alla prima apertura e 0,9 s (versione veloce)
+le volte dopo; al massimo 8 s; a mappa pronta un tocco la salta. Poi (evento `scootly-splash`) parte l'introduzione.
+
+
+Introduzione: overlay `#intro` (HTML, stile e script propri, prima dello script dell'interfaccia: si vede subito, mentre la mappa si
 carica). Due schermate su sfondo "aurora": benvenuto con icona e tre funzioni, poi "Prima di partire" (posizione,
 schermo acceso, cartelli, "Aggiungi alla Home" solo se aperta da Safari). Si vede finché manca `scooter-intro`;
 finché è aperta (`window.__intro`) l'app non chiede la posizione: la chiede "Consenti posizione e inizia"
