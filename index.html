@@ -233,12 +233,16 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 /* ===== Introduzione (prima apertura): sfondo "aurora", icona in 3D, due schermate ===== */
 .intro { position: fixed; inset: 0; z-index: 60; overflow: hidden; background: #0e0b14; color: #fff; font-family: var(--font-body); transition: opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
 .intro.out { opacity: 0; transform: scale(1.08); pointer-events: none; }
-.in-blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .75; }
-.in-b1 { width: 340px; height: 340px; background: #ff6a1a; left: -80px; top: -60px; animation: inF1 8s ease-in-out infinite alternate; }
-.in-b2 { width: 300px; height: 300px; background: #ff2d75; right: -90px; top: 120px; animation: inF2 9s ease-in-out infinite alternate; }
-.in-b3 { width: 320px; height: 320px; background: #6b3cff; left: 20px; bottom: -120px; animation: inF1 10s ease-in-out infinite alternate-reverse; }
-@keyframes inF1 { to { transform: translate(60px, 40px) scale(1.15); } }
-@keyframes inF2 { to { transform: translate(-50px, 60px) scale(.9); } }
+/* Sfondo "aurora": un solo strato con sfumature di colore che si sposta piano. Niente sfocature (filter: blur)
+   animate: su iPhone Safari le ridisegna di continuo e lo sfondo lampeggia. */
+.aurora { position: absolute; inset: -18%; pointer-events: none; will-change: transform; transform: translate3d(0,0,0); backface-visibility: hidden;
+  background:
+    radial-gradient(ellipse 60% 45% at 18% 14%, rgba(255,106,26,.95), rgba(255,106,26,0) 100%),
+    radial-gradient(ellipse 55% 45% at 88% 38%, rgba(255,45,117,.85), rgba(255,45,117,0) 100%),
+    radial-gradient(ellipse 65% 50% at 30% 92%, rgba(107,60,255,.9), rgba(107,60,255,0) 100%),
+    #0e0b14;
+  animation: aurora 14s ease-in-out infinite alternate; }
+@keyframes aurora { from { transform: translate3d(-4%, -3%, 0) rotate(0deg); } to { transform: translate3d(4%, 3%, 0) rotate(3deg); } }
 .in-glass { position: absolute; inset: 0; background: rgba(14,11,20,.35); }
 .in-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: calc(56px + env(safe-area-inset-top)) 26px calc(140px + env(safe-area-inset-bottom)); box-sizing: border-box; overflow-y: auto; transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
 .in-page.next { opacity: 0; transform: translateX(40px); pointer-events: none; }
@@ -289,7 +293,7 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
   .in-ic { width: 40px; height: 40px; border-radius: 12px; }
   .in-bar { bottom: calc(14px + env(safe-area-inset-bottom)); gap: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .intro *, .intro *::after { animation-duration: .01s !important; animation-delay: 0s !important; } .in-page { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .aurora { animation: none; } .intro *, .intro *::after { animation-duration: .01s !important; animation-delay: 0s !important; } .in-page { transition: none; } }
 @media (prefers-reduced-motion: no-preference) { .card, .suggest { animation: rise .18s ease-out; } @keyframes rise { from { transform: translateY(6px); opacity: .6; } to { transform: none; opacity: 1; } } }
 </style>
 </head>
@@ -898,7 +902,7 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 
 </script>
 <div class="splash" id="splash" aria-label="Scootly">
-  <div class="in-blob in-b1"></div><div class="in-blob in-b2"></div><div class="in-blob in-b3"></div><div class="in-glass"></div>
+  <div class="aurora"></div><div class="in-glass"></div>
   <div class="sp-logo"><span class="sp-ring"></span><span class="sp-ring"></span><div class="sp-icon"><svg viewBox="0 0 64 64"><g fill="currentColor"><circle cx="16" cy="46" r="8"/><circle cx="49" cy="46" r="8"/><path d="M7 44c0-10 7-16 17-16h5l4 11h10l3-5h4l-3 11H9z"/><rect x="13" y="21" width="17" height="6" rx="3"/><path d="M42 12h10a2 2 0 0 1 0 4h-3l4.5 25h-4.5l-4.5-25h-2.5a2 2 0 0 1 0-4z"/></g></svg></div></div>
   <div class="sp-word"><span>S</span><span>c</span><span>o</span><span>o</span><span>t</span><span>l</span><span>y</span></div>
   <p class="sp-tag">Milano in scooter</p>
@@ -926,7 +930,7 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
 })();
 </script>
 <div class="intro" id="intro" hidden>
-  <div class="in-blob in-b1"></div><div class="in-blob in-b2"></div><div class="in-blob in-b3"></div><div class="in-glass"></div>
+  <div class="aurora"></div><div class="in-glass"></div>
   <section class="in-page on" data-p="0">
     <div class="in-icon"><svg viewBox="0 0 64 64"><g fill="currentColor"><circle cx="16" cy="46" r="8"/><circle cx="49" cy="46" r="8"/><path d="M7 44c0-10 7-16 17-16h5l4 11h10l3-5h4l-3 11H9z"/><rect x="13" y="21" width="17" height="6" rx="3"/><path d="M42 12h10a2 2 0 0 1 0 4h-3l4.5 25h-4.5l-4.5-25h-2.5a2 2 0 0 1 0-4z"/></g></svg></div>
     <h1>Scootly</h1>
