@@ -35,6 +35,7 @@
   --car: #4d6a8a;
   --fix: #b0306b;
   --good: #1d7a55;
+  --nav-green: #137a43; --nav-green-dark: #0c5a30;
   --park: #d3e5c8; --water: #b7d5e6; --building: #dcdfd7; --rail: #aeb4ab; --metro: #d4232b;
   --shadow: 0 6px 24px rgba(30, 39, 41, .16);
   --font-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
@@ -49,6 +50,7 @@
     --panel: #1d2427; --panel-line: #313b3e;
     --accent: #ff7f3a; --accent-soft: #6b3a1e; --accent-ink: #1a0f08; --moto-only: #ff9a55;
     --car: #8fb0d4; --fix: #f06aa6; --good: #54c894;
+    --nav-green: #0f6237; --nav-green-dark: #0a4527;
     --park: #1e2d23; --water: #1a3240; --building: #21292c; --rail: #3d4749; --metro: #e2474e;
     --shadow: 0 6px 24px rgba(0, 0, 0, .5);
   }
@@ -61,6 +63,7 @@
   --panel: #1d2427; --panel-line: #313b3e;
   --accent: #ff7f3a; --accent-soft: #6b3a1e; --accent-ink: #1a0f08; --moto-only: #ff9a55;
   --car: #8fb0d4; --fix: #f06aa6; --good: #54c894;
+  --nav-green: #0f6237; --nav-green-dark: #0a4527;
   --park: #1e2d23; --water: #1a3240; --building: #21292c; --rail: #3d4749; --metro: #e2474e;
   --shadow: 0 6px 24px rgba(0, 0, 0, .5);
 }
@@ -172,18 +175,28 @@ body {
 .favrow .btn { padding: 6px 12px; flex: none; }
 [hidden] { display: none !important; }
 body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banner { display: none; }
-.navtop { position: absolute; left: 16px; right: 16px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 7; background: var(--ink); color: var(--panel); border-radius: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; padding: 12px 14px; max-width: 520px; margin: 0 auto; }
-.nt-ic { width: 64px; height: 64px; border-radius: 14px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; }
-.nt-dist { font: 700 40px/1 var(--font-cond); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-.nt-name { font: 500 18px/1.2 var(--font-body); margin-top: 4px; overflow-wrap: anywhere; }
-.nt-name .tag { color: var(--ink); }
-.navbot { position: absolute; left: 16px; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 7; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; padding: 10px 12px 10px 16px; max-width: 520px; margin: 0 auto; }
-.nb-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.nb-info b { font: 700 28px/1 var(--font-cond); color: var(--accent); font-variant-numeric: tabular-nums; }
-.nb-info span { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-.navbot .tool { box-shadow: none; }
-.navbot .btn { padding: 12px 16px; }
-.recenter { position: absolute; right: 16px; z-index: 7; }
+/* Guida: riquadro verde in alto (manovra) e barra in basso (tempo, km, ora di arrivo), come Google Maps */
+.navtop { position: absolute; left: 10px; right: 10px; top: calc(8px + env(safe-area-inset-top, 0px)); z-index: 7; max-width: 520px; margin: 0 auto; color: #fff; filter: drop-shadow(0 6px 16px rgba(0,0,0,.28)); }
+.nt-main { background: var(--nav-green); border-radius: 18px; display: flex; align-items: center; gap: 12px; padding: 12px 16px 14px 10px; }
+.navtop.then .nt-main { border-bottom-left-radius: 0; }
+.nt-ic { width: 60px; height: 60px; flex: none; display: grid; place-items: center; color: #fff; }
+.nt-txt { min-width: 0; }
+.nt-dist { font: 700 32px/1 var(--font-cond); font-variant-numeric: tabular-nums; }
+.nt-name { font: 700 23px/1.15 var(--font-body); margin-top: 3px; overflow-wrap: anywhere; }
+.nt-name small { display: block; font: 500 16px/1.2 var(--font-body); opacity: .9; }
+.nt-name .tag { color: var(--ink); background: #fff; }
+.nt-then { display: inline-flex; align-items: center; gap: 6px; background: var(--nav-green-dark); padding: 7px 14px 8px; border-radius: 0 0 14px 14px; font: 600 17px var(--font-body); }
+.navbot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: var(--panel); border-top: 1px solid var(--panel-line); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,.14); display: flex; align-items: center; gap: 10px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); max-width: 560px; margin: 0 auto; }
+.nb-x { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 1px solid var(--panel-line); background: var(--panel); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+.nb-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.nb-info b { font: 700 30px/1 var(--font-cond); color: var(--good); font-variant-numeric: tabular-nums; }
+.nb-info span { font-size: 15px; color: var(--ink-soft); font-variant-numeric: tabular-nums; margin-top: 3px; }
+.navbot .tool { width: 52px; height: 52px; border-radius: 50%; box-shadow: none; }
+body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+.navfloat { position: absolute; left: 12px; z-index: 7; display: flex; align-items: center; gap: 10px; }
+.nb-limit { width: 54px; height: 54px; border-radius: 50%; background: #fff; border: 6px solid #d4232b; color: #111; display: grid; place-items: center; font: 700 22px/1 var(--font-cond); box-shadow: var(--shadow); }
+.recenter { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--panel-line); background: var(--panel); color: var(--ink); box-shadow: var(--shadow); font: 600 16px var(--font-body); cursor: pointer; }
+.recenter svg { color: #1a73e8; }
 .closepick { position: absolute; left: 16px; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 8; max-width: 520px; margin: 0 auto; background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .closepick h4 { margin: 0; font: 700 18px/1.2 var(--font-cond); }
 .closepick .btn { width: 100%; font-size: 16px; padding: 13px 10px; }
@@ -225,13 +238,19 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
 
   <div class="closepick" id="closepick" hidden></div>
   <div class="navtop" id="navtop" hidden>
-    <div class="nt-ic" id="nt-ic"></div>
-    <div><div class="nt-dist" id="nt-dist"></div><div class="nt-name" id="nt-name"></div></div>
+    <div class="nt-main"><div class="nt-ic" id="nt-ic"></div><div class="nt-txt"><div class="nt-dist" id="nt-dist"></div><div class="nt-name" id="nt-name"></div></div></div>
+    <div class="nt-then" id="nt-then" hidden></div>
   </div>
-  <button class="tool recenter" id="nb-center" hidden aria-label="Ricentra sulla tua posizione" title="Ricentra">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 20l-7-4-7 4Z"/></svg>
-  </button>
+  <div class="navfloat" id="navfloat" hidden>
+    <div class="nb-limit" id="nb-limit" hidden aria-label="Limite di velocità"></div>
+    <button class="recenter" id="nb-center" hidden aria-label="Ricentra sulla tua posizione">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 19.5 20 12 16l-7.5 4Z"/></svg>Ricentra
+    </button>
+  </div>
   <div class="navbot" id="navbot" hidden>
+    <button class="nb-x" id="nb-stop" aria-label="Esci dalla guida" title="Esci dalla guida">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
     <div class="nb-info"><b id="nb-min"></b><span id="nb-rest"></span></div>
     <button class="tool" id="nb-closed" aria-label="Strada chiusa" title="Strada chiusa">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M7 12h10"/></svg>
@@ -239,7 +258,6 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     <button class="tool" id="nb-voice" aria-label="Voce accesa" title="Voce">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4Z"/><path id="nb-wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path id="nb-mute" d="M16 9l6 6M22 9l-6 6" style="display:none"/></svg>
     </button>
-    <button class="btn fix" id="nb-stop">Fine</button>
   </div>
 </div>
 
@@ -1567,6 +1585,7 @@ body.navmode .top, body.navmode .tools, body.navmode .sheet, body.navmode .banne
     'start': '<circle cx="12" cy="12" r="4"/>',
     'arrivo': '<path d="M6 21V4m0 0h11l-2 4 2 4H6"/>',
     'rotonda': '<circle cx="12" cy="11" r="4.5"/><path d="M12 21v-5.5M16.5 11H21m-3-3 3 3-3 3"/>',
+    'inversione': '<path d="M8 20V9a4 4 0 0 1 8 0v7m0 0-3-3m3 3 3-3"/>',
   };
   const ic = k => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${TURN_IC[k] || TURN_IC.dritto}</svg>`;
   function describeAccess(fw, bw) {
@@ -2049,6 +2068,7 @@ ${steps}
     if (nav.follow && nav.disp) {
       view.cx = nav.disp[0]; view.cy = nav.disp[1];
       view.rot = angleTo(view.rot, Math.PI / 2 - nav.heading, k);
+      const zt = navZoom(); view.s += (zt - view.s) * k * 0.25; // cambio di zoom lento, senza scatti
     }
     // se non si e' mosso niente (fermo al semaforo, mappa spostata a mano) non si ridisegna: risparmia batteria
     const sig = [view.cx, view.cy, view.rot, view.s, nav.disp && nav.disp[0], nav.disp && nav.disp[1], nav.heading];
@@ -2056,6 +2076,12 @@ ${steps}
     if (last && !nav.dirty && sig.every((v, i) => Math.abs((v || 0) - (last[i] || 0)) < (i === 2 || i === 6 ? 0.002 : 0.05))) return;
     nav.lastSig = sig; nav.dirty = false;
     draw();
+  }
+  // zoom in guida (pixel per metro): 2,4 vicino a una svolta, 2,2 da fermo, ~1,8 a 30 km/h, 1,3 sopra i 55 km/h
+  function navZoom() {
+    const v = nav.vs || 0, t = nav.route && nextTurn();
+    const z = v < 3 ? 2.2 : v > 15 ? 1.3 : 2.2 - (v - 3) / 12 * 0.9;
+    return t && t.dist < 130 ? Math.max(z, 2.4) : z;
   }
   function startAnim() { if (!nav.raf) { nav.lastTs = 0; nav.raf = requestAnimationFrame(animFrame); } }
   // secondi previsti dalla partenza fino a un punto del percorso (per l'orario d'arrivo)
@@ -2162,23 +2188,38 @@ ${steps}
     nav.fixT = 0;
     update(p, { acc: nav.acc, heading, speed: nav.speed });
   }
+  const navfloat = document.getElementById('navfloat'), nbLimit = document.getElementById('nb-limit'), ntThen = document.getElementById('nt-then');
+  const icKey = st => st.arrive ? 'arrivo' : st.turn !== 'rotonda' && Math.abs(st.ang || 0) > 2.7 ? 'inversione' : st.turn;
+  const navIc = (k, z) => `<svg width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${TURN_IC[k] || TURN_IC.dritto}</svg>`;
+  // limite di velocita' della via dove sei (se OpenStreetMap lo indica)
+  function limitNow() {
+    const r = nav.route, D = r.d0s; if (!D || !D.length) return 0;
+    let k = 0; while (k + 1 < D.length && D[k + 1] <= nav.along) k++;
+    const de = r.edges[k]; return de == null ? 0 : W[EDGES[de >> 1][2]][9] || 0;
+  }
   function renderNav(nt, remaining) {
-    const ic2 = k => `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${TURN_IC[k] || TURN_IC.dritto}</svg>`;
-    if (nt) {
-      document.getElementById('nt-ic').innerHTML = ic2(nt.st.turn);
-      document.getElementById('nt-dist').textContent = round(nt.dist);
-      document.getElementById('nt-name').innerHTML = (nt.st.turn === 'rotonda' ? `Rotonda: ${esc(nt.st.exitName)} uscita, ${esc(nt.st.verso)}<br>` : '') + esc(nt.st.name) + (nt.st.motoOnly ? '<span class="tag">solo moto</span>' : '');
-    } else {
-      document.getElementById('nt-ic').innerHTML = ic2('arrivo');
-      document.getElementById('nt-dist').textContent = round(remaining);
-      document.getElementById('nt-name').textContent = 'Arrivo: ' + (state.to ? state.to.label : '');
+    const m = nt || { k: (nav.route.turns || []).length, st: { arrive: true }, dist: remaining };
+    document.getElementById('nt-ic').innerHTML = navIc(icKey(m.st), 52);
+    document.getElementById('nt-dist').textContent = round(m.dist);
+    document.getElementById('nt-name').innerHTML = m.st.arrive ? esc(state.to ? state.to.label : 'Arrivo') + '<small>Arrivo</small>'
+      : (m.st.turn === 'rotonda' ? `<small>Rotonda: ${esc(m.st.exitName)} uscita</small>` : '') + esc(m.st.name && m.st.name !== 'strada senza nome' ? m.st.name : cap(phrase(m.st))) + (m.st.motoOnly ? ' <span class="tag">solo moto</span>' : '');
+    // "Poi": la manovra dopo, se arriva entro 250 m (come Google)
+    let then = null;
+    if (!m.st.arrive) {
+      const n2 = (nav.route.turns || [])[m.k + 1];
+      if (n2 && n2.d0 - m.st.d0 < 250) then = n2;
+      else if (!n2 && nav.route.length - m.st.d0 < 250) then = { arrive: true };
     }
+    ntThen.hidden = !then; navtop.classList.toggle('then', !!then);
+    if (then) ntThen.innerHTML = 'Poi ' + navIc(icKey(then), 22);
     const secs = Math.max(0, nav.route.time - timeAt(nav.along)) * timeFactor().f * (nav.histK || 1);
     const eta = new Date(Date.now() + secs * 1000);
     document.getElementById('nb-min').textContent = Math.max(1, Math.round(secs / 60)) + ' min';
-    document.getElementById('nb-rest').textContent = `${fmtKm(remaining)} · arrivo alle ${String(eta.getHours()).padStart(2, '0')}:${String(eta.getMinutes()).padStart(2, '0')}`;
+    document.getElementById('nb-rest').textContent = `${fmtKm(remaining)} · ${String(eta.getHours()).padStart(2, '0')}:${String(eta.getMinutes()).padStart(2, '0')}`;
+    const lim = limitNow(); nbLimit.hidden = !lim; if (lim) nbLimit.textContent = lim;
     recenter.hidden = nav.follow;
-    recenter.style.bottom = (navbot.getBoundingClientRect().height + 24) + 'px';
+    navfloat.hidden = nbLimit.hidden && recenter.hidden;
+    navfloat.style.bottom = (navbot.getBoundingClientRect().height + 14) + 'px';
   }
   async function keepAwake() {
     try { if ('wakeLock' in navigator && document.visibilityState === 'visible') nav.wake = await navigator.wakeLock.request('screen'); } catch (e) {}
@@ -2204,7 +2245,7 @@ ${steps}
     nav.cur = sim ? null : { a: rnd(state.from.p), b: rnd(state.to.p), t0: Date.now(), pred: H ? H.s : pred, lastP: null, lastT: Date.now() };
     prepRoute(state.moto); recStart();
     document.body.classList.add('navmode'); navtop.hidden = false; navbot.hidden = false;
-    view.s = 1.3; view.oy = 0.66;
+    view.s = 2.2; view.oy = 0.7;
     // subito centrata sull'inizio del percorso e girata nel verso di marcia, anche prima del primo segnale GPS
     { const L0 = state.moto.line, h0 = L0.length > 1 ? Math.atan2(L0[1][1] - L0[0][1], L0[1][0] - L0[0][0]) : Math.PI / 2;
       nav.disp = L0[0].slice(); nav.heading = h0; view.rot = Math.PI / 2 - h0; view.cx = nav.disp[0]; view.cy = nav.disp[1]; }
@@ -2254,7 +2295,7 @@ ${steps}
     if (nav.watch != null && navigator.geolocation) navigator.geolocation.clearWatch(nav.watch); nav.watch = null;
     try { if (nav.wake) nav.wake.release(); } catch (e) {} nav.wake = null;
     try { speechSynthesis.cancel(); } catch (e) {}
-    document.body.classList.remove('navmode'); navtop.hidden = true; navbot.hidden = true; recenter.hidden = true; closePick.hidden = true;
+    document.body.classList.remove('navmode'); navtop.hidden = true; navbot.hidden = true; recenter.hidden = true; navfloat.hidden = true; closePick.hidden = true;
     view.rot = 0; view.oy = 0.5; nav.pos = null; nav.disp = null;
     compute(false); render(); fitRoute();
   }
@@ -2294,7 +2335,7 @@ ${steps}
     closePick.appendChild(c);
     closePick.hidden = false;
   });
-  recenter.addEventListener('click', () => { nav.follow = true; startAnim(); });
+  recenter.addEventListener('click', () => { nav.follow = true; recenter.hidden = true; navfloat.hidden = nbLimit.hidden; startAnim(); });
   function voiceIcon() {
     document.getElementById('nb-wave').style.display = nav.voice ? '' : 'none';
     document.getElementById('nb-mute').style.display = nav.voice ? 'none' : '';

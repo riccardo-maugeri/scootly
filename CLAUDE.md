@@ -113,6 +113,10 @@ In guida ~16 ms per immagine nel browser di prova.
   direzione; fuori percorso se oltre max(30, precisione+15) m per 2 letture e 3 s (o verso opposto per
   3 letture); `animFrame()` fa scorrere l'icona lungo la strada a ~30 fps stimando con la velocità.
   Prova di guida simulata nel browser: rumore ±10 m e una lettura sbagliata di 70 m → 0 ricalcoli.
+- Schermata di guida come Google Maps (`renderNav()`): riquadro verde in alto con freccia, distanza e via
+  (e "Poi" con la manovra dopo, se entro 250 m), barra in basso con minuti, km e ora di arrivo, X per uscire,
+  limite di velocità della via (campo `limite`), "Ricentra" se sposti la mappa. Zoom automatico (`navZoom()`):
+  più vicino da fermo e prima delle svolte, più lontano quando vai veloce.
 - Voce (come Google Maps, `voiceTick()`): per ogni manovra al massimo tre frasi, con tempi che dipendono
   dalla velocità media `nav.vs` (almeno 25 km/h): appena fatta la manovra precedente "Continua su Via X per
   800 metri" (se la prossima è lontana), preavviso ~22 s prima (≥ 160 m) "Tra 200 metri, svolta a destra in
