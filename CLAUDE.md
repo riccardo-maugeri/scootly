@@ -29,6 +29,7 @@ Nessun framework, nessuna compilazione, nessuna dipendenza: GitHub Pages serve i
 | `data/rapporto.md` | Rapporto in italiano sull'ultima mappa generata (`tools/check_data.py`). |
 | `sw.js` | Service worker: copia app e mappa sul telefono per usarle anche senza rete. Pagine: prima la rete; mappa: subito la copia salvata, la nuova si scarica in sottofondo. |
 | `tools/` | Strumenti per costruire, controllare e collaudare i dati (vedi `tools/README.md`). |
+| `.github/workflows/prove.yml` | A ogni richiesta di pubblicazione (e su `main`): `collaudo.js` e `tools/prove_app.js`, l'app vera in Chromium come un iPhone (avvio, dati vecchi, ricerca, preferiti, guida con voce e tempi, tema scuro, iPhone SE). |
 | `.github/workflows/aggiorna-mappa.yml` | Ogni lunedì ricostruisce la mappa e la pubblica solo se passano i controlli (regole del Comune tutte applicate, nessun disaccordo nuovo con il Comune, nessun cambiamento anomalo, collaudo). Dettagli in `tools/README.md`. |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon.png` | Installazione come app sulla Home. |
 
@@ -169,6 +170,7 @@ il sito è pubblico.
 
 ```bash
 node tools/collaudo.js                      # prove automatiche sui dati in data/strade.json (devono passare tutte)
+node tools/prove_app.js                     # prove dell'app nel browser (serve il server qui sotto e Playwright)
 node tools/compare_routes.js vecchi.json data/strade.json   # cosa cambia nei tragitti tra due versioni
 python3 -m http.server 8765                 # poi apri http://127.0.0.1:8765 (Playwright/Chromium per provarla come un iPhone)
 ```

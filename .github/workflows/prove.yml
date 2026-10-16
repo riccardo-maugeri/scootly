@@ -1,0 +1,38 @@
+# Prove automatiche a ogni modifica: collaudo di mappa e motore, poi l'app vera in un browser che fa
+# finta di essere un iPhone (avvio, ricerca, preferiti, guida con la voce, tempi, tema scuro).
+# Se qualcosa si rompe, la richiesta di pubblicazione mostra una croce rossa invece della spunta verde.
+name: Prove automatiche
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Collaudo della mappa e del motore
+        run: node tools/collaudo.js
+
+      - name: Installa il browser di prova
+        run: |
+          npm install --no-save --no-package-lock playwright@1.48.2
+          npx playwright install --with-deps chromium
+
+      - name: Prove dell'app (come un iPhone)
+        run: |
+          python3 -m http.server 8765 >/dev/null 2>&1 &
+          sleep 2
+          node tools/prove_app.js

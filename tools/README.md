@@ -11,6 +11,7 @@ Girano su un computer (o su GitHub), non sul telefono.
 | `regole_milano.json` | Le regole ufficiali del Comune che correggono OpenStreetMap (ZTL, aree pedonali, divieti di transito), ognuna con motivo e ordinanza. Le applica `build_data.py`. |
 | `collaudo.js` | Prove automatiche da superare prima di pubblicare: dati completi e recenti, tragitti di riferimento a vari orari, regole note (Garibaldi, Monte Ceneri, Duomo), 300 tragitti a caso senza strade vietate né zone "solo destinatari" attraversate. Se una prova fallisce esce con errore. |
 | `eccezioni_comune.json` | Disaccordi con il Comune già esaminati e lasciati come in OpenStreetMap (casi dubbi). Ogni disaccordo **nuovo** blocca l'aggiornamento automatico. |
+| `prove_app.js` | Prove dell'app vera in un browser che fa finta di essere un iPhone: avvio (anche con dati vecchi salvati), ricerca, preferiti, guida con voce, tempi dei tragitti, tema scuro, schermo piccolo. Girano su GitHub a ogni richiesta di pubblicazione (`.github/workflows/prove.yml`). |
 | `compare_routes.js` | Calcola gli stessi tragitti con due versioni dei dati e mostra cosa cambia. |
 
 ## Fonti
