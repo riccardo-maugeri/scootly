@@ -101,7 +101,11 @@ Il motore le attiva con `setTime(data)` (l'app usa l'ora attuale a ogni calcolo)
 Apertura (`#splash`, a ogni avvio, fa da schermata di caricamento): icona che entra con lo scooter, alone morbido (una volta sola, niente animazioni ripetute),
 nome lettera per lettera, barra di caricamento. Sparisce quando la mappa è pronta (evento `scootly-ready`,
 mandato anche se la mappa non si carica), dopo almeno 2,6 s alla prima apertura e 0,9 s (versione veloce)
-le volte dopo; al massimo 8 s; a mappa pronta un tocco la salta. Poi (evento `scootly-splash`) parte l'introduzione.
+le volte dopo; al massimo 8 s; a mappa pronta un tocco la salta.
+Per non far scattare le animazioni, il lavoro pesante non si sovrappone: `data/strade.json` si scarica subito ma
+si legge solo quando il logo è entrato (`window.__entered`: 1,7 s la prima volta, 0,55 s dopo); lo sfondo
+(`loadBg()`) si carica 0,4 s dopo che l'apertura è sparita (la prima volta, dopo l'introduzione). Solo animazioni
+di `transform`/`opacity` (niente `filter: blur` animati, niente `left`/`width`): su iPhone le altre scattano. Poi (evento `scootly-splash`) parte l'introduzione.
 
 
 Introduzione: overlay `#intro` (HTML, stile e script propri, prima dello script dell'interfaccia: si vede subito, mentre la mappa si
