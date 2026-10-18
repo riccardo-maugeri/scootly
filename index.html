@@ -1503,7 +1503,7 @@ body.navmode .toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
   // Fuori dalla zona coperta, con la mappa normale, si vede la mappa stradale Esri sbiadita (di sera quella grigio
   // scuro, con i nomi sopra): senza rete resta solo il colore di fondo, la nostra mappa dentro la zona funziona sempre.
   // (CARTO, provata prima, dal 2026 vuole una chiave: al posto della mappa mostra una scritta.)
-  const SAT = { on: !!store.get('scooter-satellite', false) };
+  const SAT = { on: !!store.get('scooter-satellite', true) }; // satellite di serie: si spegne col pulsante (e la scelta resta)
   const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
   const esri = name => (z, x, y) => `${ESRI}${name}/MapServer/tile/${z}/${y}/${x}`;
   const LAYERS = {

@@ -123,7 +123,7 @@ In guida ~16 ms per immagine nel browser di prova.
 
 Mappe a piastrelle (`LAYERS`, `drawTiles()`; quadrati Web Mercator disegnati nei loro rettangoli in metri, a strisce
 da lontano; finché una non arriva si usa quella del livello sopra):
-- **Vista satellite** (pulsante a livelli `#satbtn`, in guida `#nb-sat`; scelta salvata in `scooter-satellite`): foto
+- **Vista satellite** (pulsante a livelli `#satbtn`, in guida `#nb-sat`; acceso di serie, la scelta di spegnerlo resta in `scooter-satellite`): foto
   Esri World Imagery, strade come velo bianco sottile, scritte bianche bordate. Scelta dopo un confronto (10/2026): Esri
   nitida fino a z19 e veloce; le ortofoto della Regione Lombardia rifiutano le richieste delle app esterne. Senza rete
   (8 errori) torna la mappa disegnata, si riprova dopo 30 s.

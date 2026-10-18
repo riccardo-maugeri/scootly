@@ -178,12 +178,13 @@ function check(ok, msg) { console.log((ok ? '  ok   ' : '  NO   ') + msg); if (!
     // le piastrelle (Esri) non si scaricano davvero: un'immagine finta, cosi' la prova non dipende dalla rete
     const asked = [], png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
     await ctx.route(/arcgisonline/, r => { asked.push(r.request().url()); r.fulfill({ status: 200, contentType: 'image/png', body: png }); });
-    await page.click('#satbtn'); await page.waitForTimeout(800);
-    check(await page.evaluate(() => localStorage.getItem('scooter-satellite')) === 'true', 'il pulsante a livelli accende il satellite (e la scelta resta salvata)');
-    check(asked.some(u => u.includes('World_Imagery')), `si chiedono le foto satellitari (${asked.length})`);
     await page.reload(); await page.ready();
-    check(await page.$eval('#satbtn', b => b.classList.contains('on')), 'riaprendo l\'app il satellite è ancora acceso');
-    await page.click('#satbtn'); asked.length = 0;
+    check(await page.$eval('#satbtn', b => b.classList.contains('on')), 'il satellite è acceso di serie');
+    check(asked.some(u => u.includes('World_Imagery')), `si chiedono le foto satellitari (${asked.length})`);
+    await page.click('#satbtn'); await page.waitForTimeout(500);
+    check(await page.evaluate(() => localStorage.getItem('scooter-satellite')) === 'false', 'il pulsante a livelli lo spegne (e la scelta resta salvata)');
+    await page.reload(); await page.ready(); asked.length = 0;
+    check(await page.$eval('#satbtn', b => !b.classList.contains('on')), 'riaprendo l\'app resta la mappa');
     for (let i = 0; i < 25; i++) { await page.click('#zout'); await page.waitForTimeout(60); }
     await page.waitForTimeout(800);
     check(asked.some(u => /World_Street_Map|Dark_Gray/.test(u)), 'allontanando la mappa, fuori zona si vede la mappa del mondo');
