@@ -29,7 +29,7 @@ Nessun framework, nessuna compilazione, nessuna dipendenza: GitHub Pages serve i
 | `data/rapporto.md` | Rapporto in italiano sull'ultima mappa generata (`tools/check_data.py`). |
 | `sw.js` | Service worker: copia app e mappa sul telefono per usarle anche senza rete. Pagine: prima la rete; mappa: subito la copia salvata, la nuova si scarica in sottofondo. |
 | `tools/` | Strumenti per costruire, controllare e collaudare i dati (vedi `tools/README.md`). |
-| `.github/workflows/prove.yml` | A ogni richiesta di pubblicazione (e su `main`): `collaudo.js` e `tools/prove_app.js`, l'app vera in Chromium come un iPhone (avvio, dati vecchi, ricerca, preferiti, guida con voce e tempi, tema scuro, iPhone SE). |
+| `.github/workflows/prove.yml` | A ogni richiesta di pubblicazione (e su `main`): `collaudo.js` e `tools/prove_app.js`, l'app vera in Chromium come un iPhone (avvio, dati vecchi, ricerca, preferiti, guida con voce e tempi, tema scuro, iPhone SE, satellite). |
 | `.github/workflows/aggiorna-mappa.yml` | Ogni lunedì ricostruisce la mappa e la pubblica solo se passano i controlli (regole del Comune tutte applicate, nessun disaccordo nuovo con il Comune, nessun cambiamento anomalo, collaudo). Dettagli in `tools/README.md`. |
 | `manifest.webmanifest`, `icon-*.png`, `apple-touch-icon.png` | Installazione come app sulla Home. |
 
@@ -118,8 +118,22 @@ finché è aperta (`window.__intro`) l'app non chiede la posizione: la chiede "C
 
 `draw()` calcola una volta per immagine il rettangolo visibile (`VB`), poi: sfondo (`drawBg()`, con una
 trasformazione metri→pixel e un indice a celle da 250 m; edifici solo da `view.s ≥ 0.45`), confine della
-zona (`drawArea()`), strade, percorsi, etichette (vie, fermate metro "M", luoghi famosi con importanza 2).
+zona (`drawArea()`, tratteggio arancione), strade, percorsi, etichette (vie, fermate metro "M", luoghi famosi con importanza 2).
 In guida ~16 ms per immagine nel browser di prova.
+
+Mappe a piastrelle (`LAYERS`, `drawTiles()`; quadrati Web Mercator disegnati nei loro rettangoli in metri, a strisce
+da lontano; finché una non arriva si usa quella del livello sopra):
+- **Vista satellite** (pulsante a livelli `#satbtn`, in guida `#nb-sat`; scelta salvata in `scooter-satellite`): foto
+  Esri World Imagery, strade come velo bianco sottile, scritte bianche bordate. Scelta dopo un confronto (10/2026): Esri
+  nitida fino a z19 e veloce; le ortofoto della Regione Lombardia rifiutano le richieste delle app esterne. Senza rete
+  (8 errori) torna la mappa disegnata, si riprova dopo 30 s.
+- **Fuori zona** (stile FreeNow): la mappa stradale Esri (di sera Dark Gray + nomi), sbiadita da un velo
+  (`drawOutside()`); dentro il confine il fondo della nostra mappa. Si scarica solo se si vede qualcosa fuori
+  (`outsideVisible()`). CARTO non si usa: dal 2026 vuole una chiave.
+- La fonte va sempre scritta in basso (`drawAttribution()`). Il service worker non salva le piastrelle (altro sito):
+  le tiene la cache normale di Safari.
+- Zoom indietro fino all'Europa intera (`clampView()`, `EUROPA`); quando la zona è più piccola di 70 pixel si
+  disegna solo l'icona di Scootly su Milano (`drawMilanMark()`), che al tocco riporta sulla città (`flyToMilan()`).
 
 ### GPS (in `index.html`)
 
@@ -151,7 +165,7 @@ In guida ~16 ms per immagine nel browser di prova.
 `[{nome, via, p: [x, y]}]`, salvati con la stella ☆ accanto a "Vai"; chiamarne uno "Casa" aggiorna `scooter-casa`), `scooter-recenti`, `scooter-viaggi` (vecchio confronto
 stimato/reale, usato solo finché non ci sono tempi imparati), `scooter-tempi` (tempi imparati: per via OSM
 e verso `[secondi, metri, osservazioni]` e per classe `[secondiVeri, secondiPrevisti]`, con i viaggi recenti
-che pesano di più), `scooter-voce`, `scooter-intro` (introduzione già vista), `scooter-tragitti` (tempi veri porta a porta: `[{a, b, s, d, h}]`, partenza
+che pesano di più), `scooter-voce`, `scooter-intro` (introduzione già vista), `scooter-satellite` (vista satellite accesa), `scooter-tragitti` (tempi veri porta a porta: `[{a, b, s, d, h}]`, partenza
 e arrivo in metri, secondi; per lo stesso tragitto, partenza e arrivo entro 300 m, la scheda mostra la media, o la
 mediana da 3 viaggi, e l'ora di arrivo in guida segue quei tempi), `scooter-in-corso` (viaggio in guida, salvato ogni
 8 s: se l'app viene chiusa entro 400 m dall'arrivo, alla riapertura il viaggio conta con l'ora dell'ultima posizione).

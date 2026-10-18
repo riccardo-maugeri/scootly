@@ -2,7 +2,7 @@
 // - pagine e icone: prima prova la rete, se manca usa la copia salvata
 // - mappa (data/strade.json, ~3 MB) e sfondo (data/sfondo.json): usa subito la copia salvata e intanto
 //   scarica quella nuova, che verra' usata alla prossima apertura
-const CACHE = 'scooter-v41';
+const CACHE = 'scooter-v42';
 const MAPS = ['data/strade.json', 'data/sfondo.json'];
 const FILES = ['./', 'index.html', ...MAPS, 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
