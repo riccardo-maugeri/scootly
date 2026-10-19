@@ -1,6 +1,6 @@
 # Rapporto sui dati della mappa
 
-- Mappa OpenStreetMap del: **2026-10-15T01:45:27Z**
+- Mappa OpenStreetMap del: **2026-10-19T01:57:44Z**
 - Numeri civici del Comune aggiornati al: **20260928**
 - Zona: zona: filovia 90/91 + 150 m; strade fino a 500 m; regole: scooter 125cc = motorcycle (moped ignorato); 145 vie corrette con le regole del Comune
 - 16104 vie, 18338 tratti, 872 divieti di svolta, 27247 civici, 14556 luoghi di interesse
